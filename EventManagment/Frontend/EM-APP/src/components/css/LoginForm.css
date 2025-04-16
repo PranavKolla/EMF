@@ -1,0 +1,83 @@
+/* Container for the login form */
+.login-container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  
+  /* Background styling */
+  .login-background {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    z-index: -1;
+  }
+  
+  /* Form container */
+  .login-form {
+    position: absolute;
+    top: calc(50% + 25px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 397px;
+    height: 393px;
+    padding: 20px;
+    background-color: transparent;
+    border-radius: 100px;
+  }
+  
+  /* Form title */
+  .login-title {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Input fields */
+  .login-input-container {
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .login-input-container label {
+    display: block;
+    margin-bottom: 20px;
+  }
+  
+  .login-input {
+    width: 80%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* Error message */
+  .login-error {
+    color: red;
+    margin-bottom: 5px;
+    text-align: center;
+  }
+  
+  /* Buttons */
+  .login-button {
+    background: none;
+    border: 3px #ddddddcf;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .new-user-button {
+    background-color: transparent;
+    border: none;
+    color: red;
+    cursor: pointer;
+    text-decoration: underline;
+    margin-right: 10px;
+  }

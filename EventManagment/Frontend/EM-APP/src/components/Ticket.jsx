@@ -1,5 +1,5 @@
 import React from "react";
-import "./Ticket.css";
+import "./css/Ticket.css"; // Import your CSS file
 
 const Ticket = ({ issuedBy, inviteNumber, bookingDate, status }) => {
   return (

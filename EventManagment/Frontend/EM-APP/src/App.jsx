@@ -6,6 +6,7 @@ import OrganizerDashboard from "./dashbords/OrganizerDashboard";
 import AttendeeDashboard from "./dashbords/AttendeeDashboard";
 import EventDashboard from "./dashbords/EventDashboard";
 import Home from "./dashbords/Home";
+import SignUpForm from "./components/SignUpForm";
 
 function App() {
   const isAuthenticated = !!localStorage.getItem("jwtToken");
@@ -13,6 +14,7 @@ function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/signup" element={<SignUpForm onCancel={() => window.history.back()} />} /> 
         <Route path="/" element={<LoginForm />} />
         <Route path="/admin-dashboard" element={isAuthenticated ? <AdminDashboard /> : <LoginForm />} />
         <Route path="/organizer-dashboard" element={isAuthenticated ? <OrganizerDashboard /> : <LoginForm />} />

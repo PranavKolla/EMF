@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate for redire
 import { jwtDecode } from "jwt-decode"; // Correct import statement
 import ShinyText from "../reactbits/ShinyText";
 import ShapeBlur from "../reactbits/ShapeBlur"; // Assuming you have a ShapeBlur component
+import SignUpForm from "./SignUpForm";
+import "./css/LoginForm.css"; // Import your CSS file
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [showSignUp, setShowSignUp] = useState(false); // Define the showSignUp state
   const navigate = useNavigate(); // Initialize useNavigate
 
   const handleLogin = async (e) => {
@@ -55,28 +58,14 @@ const LoginForm = () => {
     }
   };
 
+  if (showSignUp) {
+    return <SignUpForm onCancel={() => setShowSignUp(false)} />; // Render SignUpForm if toggled
+  }
+
   return (
-    <div
-      style={{
-        position: "relative",
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
+    <div className="login-container">
       {/* ShapeBlur Background */}
-      <div
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)", // Center the ShapeBlur
-          width: "100vw",
-          height: "100vh",
-          overflow: "hidden",
-          zIndex: "-1", // Ensure it stays behind the form
-        }}
-      >
+      <div className="login-background">
         <ShapeBlur
           variation={0}
           pixelRatioProp={window.devicePixelRatio || 2}
@@ -89,90 +78,44 @@ const LoginForm = () => {
       </div>
 
       {/* Login Form */}
-      <div
-        style={{
-          position: "absolute",
-          top: "calc(50% + 25px)", // Shift 15px down
-          left: "50%",
-          transform: "translate(-50%, -50%)", // Center the form
-          width: "397px",
-          height: "393px",
-          padding: "20px",
-          backgroundColor: "transperant", // Semi-transparent white background
-          borderRadius: "100px",
-          
-        }}
-      >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}><ShinyText text="Event Management" speed={3} /></h2>
+      <div className="login-form">
+        <h2 className="login-title">
+          <ShinyText text="Event Management" speed={3} />
+        </h2>
         <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: "20px", textAlign: "center" }}>
-                   
-            <label
-              htmlFor="username"
-              style={{ display: "block", marginBottom: "20px" }}
-            >
-              Username
-            </label>
+          <div className="login-input-container">
+            <label htmlFor="username">Username</label>
             <input
               type="text"
               id="username"
               name="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              style={{
-                width: "80%",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-              }}
+              className="login-input"
               required
             />
           </div>
-          <div style={{ marginBottom: "30px",   textAlign: "center" }}>
-            <label
-              htmlFor="password"
-              style={{ display: "block", marginBottom: "15px" }}
-            >
-              Password
-            </label>
+          <div className="login-input-container">
+            <label htmlFor="password">Password</label>
             <input
               type="password"
               id="password"
               name="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "80%",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-              }}
+              className="login-input"
               required
             />
           </div>
-          {error && (
-            <div
-              style={{
-                color: "red",
-                marginBottom: "5px",
-                textAlign: "center",
-              }}
-            >
-              {error}
-            </div>
-          )}
+          {error && <div className="login-error">{error}</div>}
           <button
-            type="submit"
-            style={{
-              background: "none",
-              border: " 3 px #ddddddcf",
-              padding: "10px 20px",
-              cursor: "pointer",
-              display: "block",
-              margin: "0 auto",
-              textAlign: "center",
-            }}
+            type="button"
+            onClick={() => setShowSignUp(true)} // Toggle SignUpForm
+            className="new-user-button"
           >
+            New User?
+          </button>
+          <button type="submit" className="login-button">
             <ShinyText text="Login" speed={3} />
           </button>
         </form>
