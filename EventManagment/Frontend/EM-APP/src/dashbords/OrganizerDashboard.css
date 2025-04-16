@@ -1,0 +1,30 @@
+/* OrganizerDashboard.css */
+.card {
+    position: relative;
+    margin: 16px;
+    padding: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+  }
+  
+  .cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .cardContent {
+    margin-top: 16px;
+  }
+  
+  .activeDot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 10px;
+    height: 10px;
+    background-color: green;
+    border-radius: 50%;
+  }
+  

@@ -1,0 +1,46 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  height: 100vh; /* Full viewport height */
+  width: 100vw; /* Full viewport width */
+}
+
+.appBar {
+  flex-shrink: 0;
+}
+
+.title {
+  flex-grow: 1; /* Push the username button to the right */
+}
+
+.username-button {
+  margin-left: auto; /* Align the button to the right */
+}
+
+.centered-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1; /* Take up remaining space */
+  text-align: center;
+}
+
+.searchBarContainer {
+  margin-bottom: 20px;
+}
+
+.mainContentContainer {
+  text-align: center;
+}
+
+.searchInputBase {
+  width: 300px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.exploreButton {
+  margin-top: 20px;
+}
