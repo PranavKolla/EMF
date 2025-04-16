@@ -8,15 +8,17 @@ import EventDashboard from "./dashbords/EventDashboard";
 import Home from "./dashbords/Home";
 
 function App() {
+  const isAuthenticated = !!localStorage.getItem("jwtToken");
+
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LoginForm />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/organizer-dashboard" element={<OrganizerDashboard />} />
-        <Route path="/attendee-dashboard" element={<AttendeeDashboard />} />
-        <Route path="/home" element={<Home />} /> 
-        <Route path="/events" element={<EventDashboard />} />
+        <Route path="/admin-dashboard" element={isAuthenticated ? <AdminDashboard /> : <LoginForm />} />
+        <Route path="/organizer-dashboard" element={isAuthenticated ? <OrganizerDashboard /> : <LoginForm />} />
+        <Route path="/attendee-dashboard" element={isAuthenticated ? <AttendeeDashboard /> : <LoginForm />} />
+        <Route path="/home" element={isAuthenticated ? <Home /> : <LoginForm />} />
+        <Route path="/events" element={isAuthenticated ? <EventDashboard /> : <LoginForm />} />
       </Routes>
     </Router>
   );
