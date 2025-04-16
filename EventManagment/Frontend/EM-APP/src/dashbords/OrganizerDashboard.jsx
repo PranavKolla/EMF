@@ -4,7 +4,7 @@ import  { jwtDecode } from 'jwt-decode';
 import EventCard from '../components/EventCard';
 import EventFormDialog from '../components/EventFormDialog';
 import UserFormDialog from '../components/UserFormDialog';
-import './OrganizerDashboard.css';
+import './css/OrganizerDashboard.css'; // Import your CSS file
 
 const OrganizerDashboard = () => {
   const [events, setEvents] = useState([]);

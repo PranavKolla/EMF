@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, IconButton, InputBase, Button, Container }
 import { Search as SearchIcon, AccountCircle } from '@mui/icons-material';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import './Home.css';
+import './css/Home.css'; // Import your CSS file
 
 function Home() {
   const [username, setUsername] = useState('');

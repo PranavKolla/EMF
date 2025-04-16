@@ -1,0 +1,172 @@
+.ticket-container {
+    background: #dd3f3e; /* Apply the red background only to the ticket container */
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+  }
+  
+  .ticket {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 700px;
+    margin: 20px auto;
+  }
+  
+  .stub, .check {
+    box-sizing: border-box;
+  }
+  
+  .stub {
+    background: #ef5658;
+    height: 250px;
+    width: 250px;
+    color: white;
+    padding: 20px;
+    position: relative;
+  }
+  
+  .stub:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-top: 20px solid #dd3f3e;
+    border-left: 20px solid #ef5658;
+    width: 0;
+  }
+  
+  .stub:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    border-bottom: 20px solid #dd3f3e;
+    border-left: 20px solid #ef5658;
+    width: 0;
+  }
+  
+  .stub .top {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    text-transform: uppercase;
+  }
+  
+  .stub .top .line {
+    display: block;
+    background: #fff;
+    height: 40px;
+    width: 3px;
+    margin: 0 20px;
+  }
+  
+  .stub .top .num {
+    font-size: 10px;
+  }
+  
+  .stub .top .num span {
+    color: #000;
+  }
+  
+  .stub .number {
+    position: absolute;
+    height: 30%;
+    left: 40px;
+    font-size: 20px;
+  }
+  
+  .stub .invite {
+    position: absolute;
+    left: 150px;
+    bottom: 45px;
+    color: #000;
+    width: 20%;
+  }
+  
+  .stub .invite:before {
+    content: '';
+    background: #fff;
+    display: block;
+    width: 40px;
+    height: 3px;
+    margin-bottom: 5px;
+  }
+  
+  .check {
+    background: #fff;
+    height: 250px;
+    width: 450px;
+    padding: 40px;
+    position: relative;
+    color: black; /* Change font color to black */
+  }
+  
+  .check:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-top: 20px solid #dd3f3e;
+    border-right: 20px solid #fff;
+    width: 0;
+  }
+  
+  .check:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border-bottom: 20px solid #dd3f3e;
+    border-right: 20px solid #fff;
+    width: 0;
+  }
+  
+  .check .big {
+    font-size: 50px;
+    font-weight: 900;
+    line-height: 0.8em;
+  }
+  
+  .check .number {
+    position: absolute;
+    top: 50px;
+    right: 50px;
+    color: #ef5658;
+    font-size: 40px;
+  }
+  
+  .check .info {
+    display: flex;
+    flex-wrap: wrap; /* Allow content to wrap inside the container */
+    justify-content: space-between; /* Space out sections evenly */
+    font-size: 12px;
+    margin-top: 20px;
+    width: 100%;
+    color: black; /* Ensure text color is black */
+  }
+  
+  .check .info section {
+    margin-bottom: 10px; /* Add spacing between sections */
+    width: 45%; /* Ensure sections fit within the container */
+  }
+  
+  .check .info section:before {
+    content: '';
+    background: #ef5658;
+    display: block;
+    width: 40px;
+    height: 3px;
+    margin-bottom: 5px;
+  }
+  
+  .check .info section .title {
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
