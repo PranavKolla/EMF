@@ -20,9 +20,8 @@ public class Ticket {
     @GenericGenerator(name = "ticket-id-gen", strategy = "com.ems.events.generator.TicketIdGenerator")
     private String ticketID;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "event_id", nullable = false)
-    @JsonIgnore  
     private Event event;
 
     @ManyToOne(fetch = FetchType.LAZY)
