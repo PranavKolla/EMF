@@ -23,6 +23,8 @@ public class NotificationController {
         return notificationService.getNotificationsByUser(userId);
     }
 
+   
+
     @DeleteMapping("/deletenotify/{id}")
     public String deleteNotification(@PathVariable Long id) {
         notificationService.deleteNotification(id);

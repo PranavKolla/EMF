@@ -126,9 +126,9 @@ function Home() {
             <div>
               <Typography>User ID: {userDetails.userid || userId}</Typography>
               <Typography>Username: {userDetails.username || username}</Typography>
-              <Typography>Contact Number: {userDetails.contactnomber}</Typography>
+              <Typography>Contact Number: {userDetails.contactNumber}</Typography>
               <Typography>Email: {userDetails.email}</Typography>
-              <Typography>API Endpoint: /users/{userId}</Typography>
+              {/* <Typography>API Endpoint: /users/{userId}</Typography> */}
             </div>
           )}
           {!loadingDetails && !userDetails && !errorDetails && (

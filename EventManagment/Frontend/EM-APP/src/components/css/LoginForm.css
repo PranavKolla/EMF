@@ -24,8 +24,8 @@
     top: calc(50% + 25px);
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 397px;
-    height: 393px;
+    width: 400px;
+    height: 420px;
     padding: 20px;
     background-color: transparent;
     border-radius: 100px;
@@ -41,11 +41,13 @@
   .login-input-container {
     margin-bottom: 20px;
     text-align: center;
+    width: 300px;
+    margin-left: 50px;
   }
   
   .login-input-container label {
     display: block;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
   }
   
   .login-input {
@@ -79,5 +81,5 @@
     color: red;
     cursor: pointer;
     text-decoration: underline;
-    margin-right: 10px;
+    margin-left: 142px;
   }

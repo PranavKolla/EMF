@@ -82,6 +82,38 @@ function BookingDashboard() {
     setSelectedTicket(null);
   };
 
+  const handleDeleteTicket = async (ticketId) => {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      console.error('Authentication token not found. Redirecting to login.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:9090/tickets/cancel/${ticketId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete ticket');
+      }
+
+      // Remove the deleted ticket from the bookings list
+      setBookings((prevBookings) =>
+        prevBookings.filter((booking) => booking.ticketID !== ticketId)
+      );
+
+      alert('Ticket deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting ticket:', err);
+      alert('Failed to delete ticket. Please try again.');
+    }
+  };
+
   // Group bookings by event
   const bookedEvents = bookings.reduce((acc, booking) => {
     if (!acc[booking.event.eventId]) {
@@ -129,15 +161,23 @@ function BookingDashboard() {
                       Date: {new Date(event.date).toLocaleDateString()}
                     </Typography>
                     {event.ticketsForEvent.map((ticket) => (
-                      <Button
-                        key={ticket.ticketID}
-                        variant="contained"
-                        color="primary"
-                        style={{ marginTop: '10px', marginRight: '5px' }}
-                        onClick={() => handleViewTicket(ticket)}
-                      >
-                        View Ticket ({ticket.ticketID})
-                      </Button>
+                      <div key={ticket.ticketID} style={{ marginTop: '10px' }}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          style={{ marginRight: '5px' }}
+                          onClick={() => handleViewTicket(ticket)}
+                        >
+                          View Ticket ({ticket.ticketID})
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="secondary"
+                          onClick={() => handleDeleteTicket(ticket.ticketID)}
+                        >
+                          Cancel Ticket
+                        </Button>
+                      </div>
                     ))}
                   </CardContent>
                 </Card>
@@ -151,16 +191,16 @@ function BookingDashboard() {
         <Modal open={openModal} onClose={handleCloseModal}>
           <Box
             sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                bgcolor: "background.paper",
-                boxShadow: 24,
-                p: 4,
-                width: "60vw",
-                height: "auto", // Adjust height to fit content
-                maxHeight: "90vh", // Ensure it doesn't exceed the viewport height
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              bgcolor: 'background.paper',
+              boxShadow: 24,
+              p: 4,
+              width: '60vw',
+              height: 'auto', // Adjust height to fit content
+              maxHeight: '90vh', // Ensure it doesn't exceed the viewport height
             }}
           >
             <IconButton

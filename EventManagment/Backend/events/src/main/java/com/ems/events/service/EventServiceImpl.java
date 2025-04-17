@@ -42,7 +42,7 @@ public class EventServiceImpl {
         Event savedEvent = eventRepository.save(event);
 
         // Notify users about the new event
-        notificationService.notifyAllUersAboutNewEvent(savedEvent);
+        notificationService.notifyAllUsersAboutNewEvent(savedEvent);
 
         return savedEvent;
     }

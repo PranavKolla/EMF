@@ -26,7 +26,7 @@ public class NotificationServiceImpl  {
     @Autowired
     private UserRepository userRepository;
 
-    public void notifyAllUersAboutNewEvent(Event event) {
+    public void notifyAllUsersAboutNewEvent(Event event) {
         List<User> users = userRepository.findAll();
         String message = "New Event Created: " + event.getName() + " at " + event.getLocation();
         for (User user : users) {
@@ -108,6 +108,7 @@ public class NotificationServiceImpl  {
         notification.setActive(false);
         notificationRepository.save(notification);
     }
+    
     
 
     
