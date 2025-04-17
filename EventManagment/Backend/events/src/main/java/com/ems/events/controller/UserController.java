@@ -41,7 +41,7 @@ public class UserController {
         return userService.createUser(user);
     }
 
-    // Create an organizer
+    /*// Create an organizer
     @PostMapping("/create/organizer")
     public User createOrganizer(@Valid @RequestBody CreateUserDTO createUserDTO) {
         User user = new User();
@@ -51,9 +51,9 @@ public class UserController {
         user.setContactNumber(createUserDTO.getContactNumber());
         user.setRole("ORGANIZER"); // Assign "ORGANIZER" role
         return userService.createUser(user);
-    }
+    }*/
 
-    // Create an admin
+   /* // Create an admin
     @PostMapping("/create/admin")
     public User createAdmin(@Valid @RequestBody CreateUserDTO createUserDTO) {
         User user = new User();
@@ -64,7 +64,7 @@ public class UserController {
         user.setRole("ADMIN"); // Assign "ADMIN" role
         return userService.createUser(user);
     }
-
+*/
     // Update a user
     @PutMapping("/update/{id}")
     public User updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserDTO updateUserDTO) {

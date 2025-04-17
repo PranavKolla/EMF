@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 
 const SignUpForm = ({ onCancel }) => {
@@ -6,6 +5,7 @@ const SignUpForm = ({ onCancel }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [role, setRole] = useState("attendee"); // Default role is attendee
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -14,8 +14,13 @@ const SignUpForm = ({ onCancel }) => {
     setError("");
     setSuccess("");
 
+    const apiUrl =
+      role === "attendee"
+        ? "http://localhost:9090/users/create"
+        : "http://localhost:9090/organizer/create";
+
     try {
-      const response = await fetch("http://localhost:9090/users/create", {
+      const response = await fetch(apiUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -32,7 +37,12 @@ const SignUpForm = ({ onCancel }) => {
         throw new Error("Failed to sign up. Please try again.");
       }
 
-      setSuccess("Sign up successful! You can now log in.");
+      if (role === "attendee") {
+        setSuccess("Sign up successful! You can now log in.");
+      } else {
+        setSuccess("Sign up successful! Wait for admin approval.");
+      }
+
       setTimeout(() => onCancel(), 2000); // Close the sign-up form after 2 seconds
     } catch (err) {
       setError(err.message);
@@ -127,6 +137,23 @@ const SignUpForm = ({ onCancel }) => {
               }}
               required
             />
+          </div>
+          <div style={{ marginBottom: "20px" }}>
+            <label htmlFor="role">Role:</label>
+            <select
+              id="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                border: "1px solid #ccc",
+                borderRadius: "5px",
+              }}
+            >
+              <option value="attendee">Attendee</option>
+              <option value="organizer">Organizer</option>
+            </select>
           </div>
           {error && <p style={{ color: "red" }}>{error}</p>}
           {success && <p style={{ color: "green" }}>{success}</p>}
