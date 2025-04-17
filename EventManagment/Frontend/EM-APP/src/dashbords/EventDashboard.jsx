@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode"; // Import jwt-decode library
-import { Container, Typography, Grid, Card, CardContent, CardActions, Button, Box, Modal, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close"; // Import close icon
-import Ticket from "../components/Ticket"; // Import the Ticket component
+import { jwtDecode } from "jwt-decode";
+import {
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Box,
+  Modal,
+  IconButton,
+} from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+import Ticket from "../components/Ticket";
 
 const EventDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [ticketData, setTicketData] = useState(null); // State to store ticket data
-  const [openModal, setOpenModal] = useState(false); // State to control modal visibility
+  const [ticketData, setTicketData] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -49,7 +60,7 @@ const EventDashboard = () => {
       });
   }, [navigate]);
 
-  const handleBookEvent = (eventId) => {
+  const handleBookEvent = (event) => {
     const token = localStorage.getItem("jwtToken");
 
     if (!token) {
@@ -58,18 +69,17 @@ const EventDashboard = () => {
       return;
     }
 
-    // Decode the JWT token to extract the userId
     let userId;
     try {
       const decodedToken = jwtDecode(token);
-      userId = decodedToken.userId; // Assuming the payload contains a `userId` field
+      userId = decodedToken.userId;
     } catch (err) {
       console.error("Failed to decode token:", err.message);
       navigate("/login");
       return;
     }
 
-    fetch(`http://localhost:9090/tickets/book?eventId=${eventId}&userId=${userId}`, {
+    fetch(`http://localhost:9090/tickets/book?eventId=${event.eventId}&userId=${userId}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -84,12 +94,12 @@ const EventDashboard = () => {
       })
       .then((data) => {
         console.log("Booking successful:", data);
-        const event = events.find((e) => e.eventId === eventId);
         setTicketData({
           ...data,
-          issuedBy: event?.username || "Unknown", // Add username from event data
+          eventName: event.name, // Add event name to ticket data
+          issuedBy: event.user?.userName || "Unknown", // Assuming the event object has a user with userName
         });
-        setOpenModal(true); // Open the modal to display the ticket
+        setOpenModal(true);
       })
       .catch((err) => {
         console.error("Error during booking:", err.message);
@@ -142,46 +152,43 @@ const EventDashboard = () => {
                 </Typography>
               </CardContent>
               <CardActions>
-                <Button size="small" color="primary" onClick={() => handleBookEvent(event.eventId)}>
+                <Button size="small" color="primary" onClick={() => handleBookEvent(event)}>
                   Book
                 </Button>
               </CardActions>
             </Card>
           </Grid>
         ))}
-    </Grid>
-{/* Modal for displaying the ticket */}
-<Modal open={openModal} onClose={handleCloseModal}>
-  <Box
-    sx={{
-      position: "absolute",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      bgcolor: "background.paper",
-      boxShadow: 24,
-      p: 4,
-      width: "60vw",
-      height: "auto", // Adjust height to fit content
-      maxHeight: "90vh", // Ensure it doesn't exceed the viewport height
-    }}
-  >
-    <IconButton
-      onClick={handleCloseModal}
-      sx={{ position: "absolute", top: 10, right: 10 }}
-    >
-      <CloseIcon />
-    </IconButton>
-    {ticketData && (
-      <Ticket
-        issuedBy={ticketData.issuedBy}
-        inviteNumber={ticketData.ticketID}
-        bookingDate={new Date(ticketData.bookingDate).toLocaleDateString()}
-        status={ticketData.status}
-      />
-    )}
-  </Box>
-</Modal>
+      </Grid>
+      <Modal open={openModal} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            width: "60vw",
+            height: "auto",
+            maxHeight: "90vh",
+          }}
+        >
+          <IconButton onClick={handleCloseModal} sx={{ position: "absolute", top: 10, right: 10 }}>
+            <CloseIcon />
+          </IconButton>
+          {ticketData && (
+            <Ticket
+              eventName={ticketData.eventName} // Pass eventName
+              issuedBy={ticketData.issuedBy}
+              inviteNumber={ticketData.ticketID}
+              bookingDate={new Date(ticketData.bookingDate).toLocaleDateString()}
+              status={ticketData.status}
+            />
+          )}
+        </Box>
+      </Modal>
     </Container>
   );
 };

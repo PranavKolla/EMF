@@ -83,9 +83,9 @@ public class UserController {
     }
 
     // Get a user by ID
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+    @GetMapping("/{userid}")
+    public User getUserById(@PathVariable Long userid) {
+        return userService.getUserById(userid);
     }
 
     // Login endpoint to generate JWT token

@@ -1,7 +1,19 @@
 import React from "react";
 import "./css/Ticket.css"; // Import your CSS file
+import { jwtDecode } from 'jwt-decode';
 
-const Ticket = ({ issuedBy, inviteNumber, bookingDate, status }) => {
+const Ticket = ({ eventName, issuedBy, inviteNumber, bookingDate, status }) => {
+  let usernameFromToken = '';
+  const token = localStorage.getItem('jwtToken');
+  if (token) {
+    try {
+      const decodedToken = jwtDecode(token);
+      usernameFromToken = decodedToken.sub || 'User'; // Use 'sub' to get the username
+    } catch (error) {
+      console.error("Error decoding JWT:", error);
+    }
+  }
+
   return (
     <div className="ticket-container">
       <div className="ticket">
@@ -14,14 +26,14 @@ const Ticket = ({ issuedBy, inviteNumber, bookingDate, status }) => {
               <span>{inviteNumber}</span>
             </span>
           </div>
-          <div className="number">Get<br /> Ready</div>
+          <div className="number">{eventName}</div> {/* Display event name here */}
           <div className="invite">Invite for you</div>
         </div>
         <div className="check">
           <div className="big">
             You're <br /> Invited
           </div>
-          <div className="number">#1</div>
+          <div className="number">{usernameFromToken}</div> {/* Display username from JWT ('sub' field) */}
           <div className="info">
             <section>
               <div className="title">Issued By</div>
