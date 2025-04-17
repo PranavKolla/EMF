@@ -26,11 +26,11 @@ public class NotificationServiceImpl  {
     @Autowired
     private UserRepository userRepository;
 
-    public void notifyAllUersAboutNewEvent(Event event) {
+    public void notifyAllUsersAboutNewEvent(Event event) {
         List<User> users = userRepository.findAll();
         String message = "New Event Created: " + event.getName() + " at " + event.getLocation();
         for (User user : users) {
-            createNotification(user, event, message);
+           createNotificationAndSendEmail(user, event, message, "New Event: " + event.getName());
         }
     }
 
@@ -48,7 +48,7 @@ public class NotificationServiceImpl  {
             createNotification(user, event, message);
         }
     }
-
+    
     @Scheduled(fixedRate = 60000)
     public void sendAutomaticEventReminders() {
         List<Event> events = eventRepository.findAll();
@@ -108,6 +108,7 @@ public class NotificationServiceImpl  {
         notification.setActive(false);
         notificationRepository.save(notification);
     }
+    
     
 
     

@@ -54,7 +54,7 @@ const SignUpForm = ({ onCancel }) => {
           top: "50%",
           left: "50%",
           transform: "translate(-50%, -50%)",
-          width: "397px",
+          width: "400px",
           height: "auto",
           padding: "20px",
           backgroundColor: "transparent",
@@ -72,7 +72,7 @@ const SignUpForm = ({ onCancel }) => {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               style={{
-                width: "100%",
+                width: "90%",
                 padding: "10px",
                 border: "1px solid #ccc",
                 borderRadius: "5px",
@@ -88,7 +88,7 @@ const SignUpForm = ({ onCancel }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               style={{
-                width: "100%",
+                width: "90%",
                 padding: "10px",
                 border: "1px solid #ccc",
                 borderRadius: "5px",
@@ -104,7 +104,7 @@ const SignUpForm = ({ onCancel }) => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{
-                width: "100%",
+                width: "90%",
                 padding: "10px",
                 border: "1px solid #ccc",
                 borderRadius: "5px",
@@ -120,7 +120,7 @@ const SignUpForm = ({ onCancel }) => {
               value={contactNumber}
               onChange={(e) => setContactNumber(e.target.value)}
               style={{
-                width: "100%",
+                width: "90%",
                 padding: "10px",
                 border: "1px solid #ccc",
                 borderRadius: "5px",
@@ -135,7 +135,7 @@ const SignUpForm = ({ onCancel }) => {
               type="button"
               onClick={onCancel}
               style={{
-                backgroundColor: "#ccc",
+                backgroundColor: "red",
                 border: "none",
                 padding: "10px 20px",
                 borderRadius: "5px",
