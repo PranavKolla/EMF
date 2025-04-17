@@ -34,8 +34,8 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/create", "/users/login").permitAll()
-                        .requestMatchers("/users/create/organizer").hasAuthority("ADMIN") // Use role directly
+                        .requestMatchers("/users/create", "/users/login","/organizer/create").permitAll()
+                        .requestMatchers("/organizer/admin/approve/**","/organizer/all").hasAuthority("ADMIN") // Use role directly
                         .requestMatchers("/events/manage/**").hasAnyAuthority("ORGANIZER", "ADMIN") // Use role directly
                         .requestMatchers("/events/view/all", "/feedback/**", "/notifications/**","/tickets/**").authenticated()
                         .anyRequest().authenticated()
