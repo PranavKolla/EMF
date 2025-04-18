@@ -1,46 +1,198 @@
+/* Home.css */
 .root {
+  background-color: #f8f8f2; /* Light background for the whole page */
+  color: #333; /* Dark text color */
+  min-height: 100vh; 
+  min-width: 100vw;/* Ensure full viewport height */
   display: flex;
   flex-direction: column;
-  height: 100vh; /* Full viewport height */
-  width: 100vw; /* Full viewport width */
-}
-
-.appBar {
-  flex-shrink: 0;
-}
-
-.title {
-  flex-grow: 1; /* Push the username button to the right */
-}
-
-.username-button {
-  margin-left: auto; /* Align the button to the right */
 }
 
 .centered-container {
+  flex-grow: 1; /* Take up remaining vertical space */
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  flex-grow: 1; /* Take up remaining space */
-  text-align: center;
+  justify-content: center; /* Center content vertically */
+  align-items: center; /* Center content horizontally */
+  padding: 2rem;
+ 
 }
 
 .searchBarContainer {
-  margin-bottom: 20px;
+  background-color: #f3f0f0; /* Light background for search bar */
+  border: 1px solid #848484; /* Light border */
+  border-radius: 5px;
+  margin-bottom: 2rem;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  /* Apply golden ratio for a smaller width */
+  width: 61.8%; /* Roughly 1 / 1.618 * 100% of the centered container's width */
+  max-width: 370px; /* Corresponding max width */
+}
+
+.searchInputBase {
+  color: #333;
+  flex-grow: 1;
+  margin-left: 0.5rem;
+}
+
+/* Style the SearchIcon if needed */
+.searchBarContainer svg {
+  color: #aaa;
 }
 
 .mainContentContainer {
   text-align: center;
+  padding: 2rem;
+  border-radius: 8px;
+  
+  /* Subtle light background for the content area */
+  /* background-color: #eee; */
+  /* border: 1px solid #ddd; */
 }
 
-.searchInputBase {
-  width: 300px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+.mainContentContainer h4 {
+  color: #2d8cf0; /* Vibrant title color */
+  margin-bottom: 1rem;
 }
 
+.mainContentContainer p {
+  color: #777; /* Subtitle color */
+  margin-bottom: 1.5rem;
+}
 .exploreButton {
-  margin-top: 20px;
+  --bg: #000;
+  --hover-bg: #ff90e8;
+  --hover-text: #000;
+  color: #fff;
+  cursor: pointer;
+  border: 1px solid var(--bg);
+  border-radius: 4px;
+  padding: 0.8em 2em;
+  background: var(--bg);
+  transition: 0.2s;
+}
+
+.exploreButton:hover {
+  color: var(--hover-text);
+  transform: translate(-0.25rem, -0.25rem);
+  background: var(--hover-bg);
+  box-shadow: 0.25rem 0.25rem var(--bg);
+}
+
+.exploreButton:active {
+  transform: translate(0);
+  box-shadow: none;
+}
+
+/* Notification Drawer Styles */
+.notification-drawer .MuiDialog-paper {
+  background-color: #fff;
+  color: #333;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.notification-drawer .MuiDialogTitle-root {
+  color: #333;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+}
+
+.notification-drawer .MuiDialogContent-root {
+  padding: 1rem;
+}
+
+.notification-drawer .MuiCircularProgress-root {
+  color: #2d8cf0;
+}
+
+.notification-drawer .MuiTypography-colorError {
+  color: #ff6b6b; /* Error text color */
+}
+
+.notification-drawer .MuiList-root {
+  padding-top: 0;
+}
+
+.notification-drawer .MuiListItem-root {
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding: 0.75rem 1rem;
+}
+
+.notification-drawer .MuiListItem-root:last-child {
+  border-bottom: none;
+}
+
+.notification-drawer .MuiListItemText-primary {
+  color: #333;
+}
+
+.notification-drawer .MuiListItemText-secondary {
+  color: #777;
+}
+
+.notification-drawer .MuiIconButton-root {
+  color: #777;
+}
+
+.notification-drawer .MuiIconButton-root:hover {
+  color: #333;
+}
+
+.notification-drawer .MuiDialogActions-root {
+  padding: 1rem;
+  border-top: 1px solid #eee;
+  justify-content: flex-end;
+}
+
+.notification-drawer .MuiDialogActions-root .MuiButton-root {
+  color: #333;
+  border-color: #ccc;
+}
+
+.notification-drawer .MuiDialogActions-root .MuiButton-root:hover {
+  border-color: #2d8cf0;
+  color: #2d8cf0;
+}
+
+/* User Details Dialog Styles */
+.MuiDialog-paper {
+  background-color: #fff !important;
+  color: #333 !important;
+  border-radius: 8px !important;
+  border: 1px solid #ddd !important;
+}
+
+.MuiDialogTitle-root {
+  color: #333 !important;
+  padding: 1rem !important;
+  border-bottom: 1px solid #eee !important;
+}
+
+.MuiDialogContent-root {
+  padding: 1rem !important;
+}
+
+.MuiTypography-root {
+  color: #333 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.MuiDialogActions-root {
+  padding: 1rem !important;
+  border-top: 1px solid #eee !important;
+  justify-content: flex-end !important;
+}
+
+.MuiDialogActions-root .MuiButton-root {
+  color: #333 !important;
+  border-color: #ccc !important;
+}
+
+.MuiDialogActions-root .MuiButton-root:hover {
+  border-color: #2d8cf0 !important;
+  color: #2d8cf0 !important;
 }

@@ -1,10 +1,26 @@
 import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, InputBase, Button, Container, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, List, ListItem, ListItemText, ListItemSecondaryAction, ListItemIcon } from '@mui/material';
-import { Search as SearchIcon, AccountCircle, Notifications as NotificationsIcon, Close as CloseIcon } from '@mui/icons-material';
-import { Badge } from '@mui/material';
-import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from "jwt-decode";
 import './css/Home.css';
+import Navbar from '../components/Navbar'; // Import the new Navbar component
+import {
+  Button,
+  Container,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction,
+  IconButton,
+  Typography,
+  Badge,
+  InputBase,
+} from '@mui/material';
+import { Search as SearchIcon, Close as CloseIcon } from '@mui/icons-material';
 
 function Home() {
   const [username, setUsername] = useState('');
@@ -144,46 +160,13 @@ function Home() {
     navigate('/login');
   };
 
-  const handleBookingHistoryClick = () => {
-    navigate('/bookings'); // Navigate to the Booking Dashboard route
-  };
-
-  const handleFeedbackClick = () => {
-    navigate('/feedback'); // Navigate to the Feedback Dashboard route
-  };
-
   const toggleNotificationDrawer = () => {
     setIsNotificationOpen(!isNotificationOpen);
   };
 
   return (
     <div className="root">
-      <AppBar position="static" className="appBar">
-        <Toolbar>
-          <Typography variant="h6" className="title">
-            <div>
-              <Button color="inherit" onClick={handleBookingHistoryClick}>
-                Booking History
-              </Button>
-              &nbsp;&nbsp;
-              <Button color="inherit" onClick={handleFeedbackClick}>
-                Feed Back
-              </Button>
-            </div>
-          </Typography>
-          <div>
-            <IconButton color="inherit" onClick={toggleNotificationDrawer}>
-              <Badge badgeContent={notifications.length} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
-            <IconButton edge="end" color="inherit" className="username-button" onClick={handleUsernameClick}>
-              <AccountCircle />
-              &nbsp; {username}
-            </IconButton>
-          </div>
-        </Toolbar>
-      </AppBar>
+      <Navbar username={username} /> {/* Use the new Navbar component and pass the username */}
 
       {isNotificationOpen && (
         <div className="notification-drawer">
