@@ -1,20 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import TiltedCard from "../reactbits/TiltedCard";
 import {
   Container,
   Typography,
   Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Button,
   Box,
   Modal,
   IconButton,
+  Button, // Import Button for use in TiltedCard overlay
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import Ticket from "../components/Ticket";
+import CardBackGroundImage from "../assets/CardBackGround.jpg"; // Import the local image
 
 const EventDashboard = () => {
   const [events, setEvents] = useState([]);
@@ -138,25 +137,51 @@ const EventDashboard = () => {
       <Grid container spacing={3}>
         {events.map((event) => (
           <Grid item xs={12} sm={6} md={4} key={event.eventId}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">{event.name}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {event.category}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {event.location}
-                </Typography>
-                <Typography variant="body2" color="textSecondary">
-                  {new Date(event.date).toLocaleDateString()}
-                </Typography>
-              </CardContent>
-              <CardActions>
-                <Button size="small" color="primary" onClick={() => handleBookEvent(event)}>
-                  Book
-                </Button>
-              </CardActions>
-            </Card>
+            <TiltedCard
+              imageSrc={CardBackGroundImage} // Use the imported local image
+              altText={event.name}
+              captionText={event.name}
+              containerHeight="400px"
+              containerWidth="400px"
+              imageHeight="250px"
+              imageWidth="100%"
+              rotateAmplitude={5}
+              scaleOnHover={1.05}
+              showMobileWarning={false}
+              showTooltip={true}
+              displayOverlayContent={true}
+              overlayContent={
+                <Box
+                  display="flex"
+                  flexDirection="column"
+                  justifyContent="space-around"
+                  height="100%"
+                  padding={2}
+                  color="white"
+                >
+                  <Typography variant="h6" gutterBottom>
+                    {event.name}
+                  </Typography>
+                  <Typography variant="body2" color="inherit" gutterBottom>
+                    {event.category}
+                  </Typography>
+                  <Typography variant="body2" color="inherit" gutterBottom>
+                    {event.location}
+                  </Typography>
+                  <Typography variant="body2" color="inherit" gutterBottom>
+                    {new Date(event.date).toLocaleDateString()}
+                  </Typography>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => handleBookEvent(event)}
+                    style={{ backgroundColor: "#1976d2", color: "white" }}
+                  >
+                    Book
+                  </Button>
+                </Box>
+              }
+            />
           </Grid>
         ))}
       </Grid>

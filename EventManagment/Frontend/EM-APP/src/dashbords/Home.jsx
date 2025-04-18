@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { AppBar, Toolbar, Typography, IconButton, InputBase, Button, Container, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress } from '@mui/material';
-import { Search as SearchIcon, AccountCircle } from '@mui/icons-material';
+import { AppBar, Toolbar, Typography, IconButton, InputBase, Button, Container, Dialog, DialogTitle, DialogContent, DialogActions, CircularProgress, List, ListItem, ListItemText, ListItemSecondaryAction, ListItemIcon } from '@mui/material';
+import { Search as SearchIcon, AccountCircle, Notifications as NotificationsIcon, Close as CloseIcon } from '@mui/icons-material';
+import { Badge } from '@mui/material';
 import { jwtDecode } from "jwt-decode";
 import { useNavigate } from 'react-router-dom';
 import './css/Home.css';
@@ -13,6 +14,10 @@ function Home() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [errorDetails, setErrorDetails] = useState('');
   const navigate = useNavigate();
+  const [notifications, setNotifications] = useState([]);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [loadingNotifications, setLoadingNotifications] = useState(true);
+  const [errorNotifications, setErrorNotifications] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
@@ -26,6 +31,74 @@ function Home() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (userId) {
+      fetchNotifications();
+    }
+  }, [userId]);
+
+  const fetchNotifications = async () => {
+    setLoadingNotifications(true);
+    setErrorNotifications('');
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const response = await fetch(`http://localhost:9090/notifications/usernotify/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(`Failed to fetch notifications: ${response.status} - ${errorData.message || response.statusText}`);
+      }
+      const data = await response.json();
+      setNotifications(data);
+      setLoadingNotifications(false);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setErrorNotifications(error.message);
+      setLoadingNotifications(false);
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId) => {
+    console.log('Deleting notification with ID:', notificationId);
+    try {
+      const token = localStorage.getItem('jwtToken');
+      const response = await fetch(
+        `http://localhost:9090/notifications/deletenotify/${notificationId}`,
+        {
+          method: 'PUT', // Changed to PUT as per your code
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        let errorMessage = `Failed to delete notification: ${response.status}`;
+        try {
+          const errorText = await response.text(); // Try to get the error message as text
+          errorMessage += ` - ${errorText}`;
+        } catch (textError) {
+          console.error("Failed to parse error text:", textError);
+          errorMessage += ` - ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // If the response is successful (response.ok is true),
+      // we don't necessarily need to parse JSON.
+      // We can just assume success and refresh the notifications.
+      console.log('Notification deleted successfully (no JSON expected)');
+      fetchNotifications();
+
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+      // Optionally, show an error message to the user
+    }
+  };
 
   const handleExploreClick = () => {
     navigate('/events');
@@ -75,6 +148,14 @@ function Home() {
     navigate('/bookings'); // Navigate to the Booking Dashboard route
   };
 
+  const handleFeedbackClick = () => {
+    navigate('/feedback'); // Navigate to the Feedback Dashboard route
+  };
+
+  const toggleNotificationDrawer = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+  };
+
   return (
     <div className="root">
       <AppBar position="static" className="appBar">
@@ -85,15 +166,58 @@ function Home() {
                 Booking History
               </Button>
               &nbsp;&nbsp;
-              Feed Back
+              <Button color="inherit" onClick={handleFeedbackClick}>
+                Feed Back
+              </Button>
             </div>
           </Typography>
-          <IconButton edge="end" color="inherit" className="username-button" onClick={handleUsernameClick}>
-            <AccountCircle />
-            &nbsp; {username}
-          </IconButton>
+          <div>
+            <IconButton color="inherit" onClick={toggleNotificationDrawer}>
+              <Badge badgeContent={notifications.length} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+            <IconButton edge="end" color="inherit" className="username-button" onClick={handleUsernameClick}>
+              <AccountCircle />
+              &nbsp; {username}
+            </IconButton>
+          </div>
         </Toolbar>
       </AppBar>
+
+      {isNotificationOpen && (
+        <div className="notification-drawer">
+          <Dialog open={isNotificationOpen} onClose={toggleNotificationDrawer}>
+            <DialogTitle>Notifications</DialogTitle>
+            <DialogContent>
+              {loadingNotifications && <CircularProgress />}
+              {errorNotifications && <Typography color="error">{errorNotifications}</Typography>}
+              {!loadingNotifications && notifications.length === 0 && (
+                <Typography>No new notifications.</Typography>
+              )}
+              {!loadingNotifications && notifications.length > 0 && (
+                <List>
+                  {notifications.map((notification) => (
+                    <ListItem key={notification.id}>
+                      <ListItemText primary={notification.message} secondary={new Date(notification.createdAt).toLocaleString()} />
+                      <ListItemSecondaryAction>
+                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteNotification(notification.id)}>
+                          <CloseIcon />
+                        </IconButton>
+                      </ListItemSecondaryAction>
+                    </ListItem>
+                  ))}
+                </List>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={toggleNotificationDrawer} color="primary">
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </div>
+      )}
 
       <div className="centered-container">
         <Container className="searchBarContainer">

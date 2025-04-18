@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Particles from "../reactbits/Particles";
 
 const SignUpForm = ({ onCancel }) => {
   const [userName, setUserName] = useState("");
@@ -52,12 +53,25 @@ const SignUpForm = ({ onCancel }) => {
   return (
     <div
       style={{
-        position: "relative",
+        position: "fixed", // Changed to fixed to cover the entire viewport
+        top: 0,
+        left: 0,
         width: "100vw",
         height: "100vh",
         overflow: "hidden",
+        zIndex: 0, // Ensure particles are behind the form
       }}
     >
+      <Particles
+        particleColors={['#ffffff', '#ffffff']}
+        particleCount={200}
+        particleSpread={10}
+        speed={0.1}
+        particleBaseSize={100}
+        moveParticlesOnHover={true}
+        alphaParticles={false}
+        disableRotation={false}
+      />
       <div
         style={{
           position: "absolute",
@@ -67,9 +81,10 @@ const SignUpForm = ({ onCancel }) => {
           width: "400px",
           height: "auto",
           padding: "20px",
-          backgroundColor: "transparent",
+          backgroundColor: "rgba(26, 25, 25, 0.95)", // Added a semi-transparent background for better readability
           borderRadius: "10px",
           boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+          zIndex: 1, // Ensure the form is on top of the particles
         }}
       >
         <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Sign Up</h2>
