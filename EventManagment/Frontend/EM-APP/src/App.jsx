@@ -8,7 +8,7 @@ import EventDashboard from "./dashbords/EventDashboard";
 import Home from "./dashbords/Home";
 import SignUpForm from "./components/SignUpForm";
 import BookingDashboard from "./dashbords/BookingDashboard";
-
+import FeedbackDashboard from "./dashbords/FeedbackDashboard"; 
 function App() {
   const isAuthenticated = !!localStorage.getItem("jwtToken");
 
@@ -25,6 +25,7 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignUpForm />} />
         <Route path="/bookings" element={isAuthenticated ? <BookingDashboard /> : <LoginForm />} />
+        <Route path="/feedback" element={<FeedbackDashboard />} /> 
       </Routes>
     </Router>
   );

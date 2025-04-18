@@ -37,7 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/users/create", "/users/login","/organizer/create").permitAll()
                         .requestMatchers("/organizer/admin/approve/**","/organizer/all").hasAuthority("ADMIN") // Use role directly
                         .requestMatchers("/events/manage/**").hasAnyAuthority("ORGANIZER", "ADMIN") // Use role directly
-                        .requestMatchers("/events/view/all", "/feedback/**", "/notifications/**","/tickets/**").authenticated()
+                        .requestMatchers("/events/view/all", "/feedback/submit", "/notifications/**","/tickets/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
