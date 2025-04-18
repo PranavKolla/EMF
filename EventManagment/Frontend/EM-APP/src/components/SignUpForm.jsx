@@ -1,209 +1,208 @@
 import React, { useState } from "react";
-import Particles from "../reactbits/Particles";
+import { useNavigate } from "react-router-dom";
+import { jwtDecode } from "jwt-decode";
+import "./css/LoginForm.css"; // Make sure this CSS file contains the styles for the new structure
 
-const SignUpForm = ({ onCancel }) => {
-  const [userName, setUserName] = useState("");
-  const [email, setEmail] = useState("");
+const LoginForm = () => {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
-  const [role, setRole] = useState("attendee"); // Default role is attendee
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [showSignUp, setShowSignUp] = useState(false);
+  const [signUpUsername, setSignUpUsername] = useState("");
+  const [signUpPassword, setSignUpPassword] = useState("");
+  const [signUpEmail, setSignUpEmail] = useState("");
+  const [signUpContactNumber, setSignUpContactNumber] = useState("");
+  const [isOrganizer, setIsOrganizer] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSignUp = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
-    setSuccess("");
-
-    const apiUrl =
-      role === "attendee"
-        ? "http://localhost:9090/users/create"
-        : "http://localhost:9090/organizer/create";
 
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetch("http://localhost:9090/users/login", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: JSON.stringify({
-          userName,
-          email,
+        body: new URLSearchParams({
+          username,
           password,
-          contactNumber,
         }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to sign up. Please try again.");
+        throw new Error("Invalid username or password");
       }
 
-      if (role === "attendee") {
-        setSuccess("Sign up successful! You can now log in.");
+      const data = await response.json();
+      const token = data.token;
+      const decodedToken = jwtDecode(token);
+      const userRole = decodedToken.role;
+      localStorage.setItem("jwtToken", token);
+
+      if (userRole === "ADMIN") {
+        navigate("/admin-dashboard");
+      } else if (userRole === "ORGANIZER") {
+        navigate("/organizer-dashboard");
+      } else if (userRole === "ATTENDEE") {
+        navigate("/home");
       } else {
-        setSuccess("Sign up successful! Wait for admin approval.");
+        throw new Error("Invalid role");
       }
-
-      setTimeout(() => onCancel(), 2000); // Close the sign-up form after 2 seconds
     } catch (err) {
       setError(err.message);
     }
   };
 
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    setError(""); // Clear any previous errors
+
+    const signupData = {
+      username: signUpUsername,
+      password: signUpPassword,
+      email: signUpEmail,
+      contactNumber: signUpContactNumber,
+    };
+
+    const headers = {
+      "Content-Type": "application/json",
+    };
+
+    let url = "http://localhost:9090/users/create";
+    let body = JSON.stringify({ ...signupData, role: "ATTENDEE" });
+
+    if (isOrganizer) {
+      url = "http://localhost:9090/organizer/create";
+      body = JSON.stringify(signupData); // Organizer API might not need the 'role' field
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: headers,
+        body: body,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Signup failed");
+      }
+
+      // Optionally, redirect to login or show a success message
+      setShowSignUp(false); // Go back to the login form
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleToggleSignUp = () => {
+    setShowSignUp(!showSignUp);
+    setError(""); // Clear any previous errors when toggling
+  };
+
+  const handleOrganizerChange = (e) => {
+    setIsOrganizer(e.target.checked);
+  };
+
   return (
-    <div
-      style={{
-        position: "fixed", // Changed to fixed to cover the entire viewport
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100vh",
-        overflow: "hidden",
-        zIndex: 0, // Ensure particles are behind the form
-      }}
-    >
-      <Particles
-        particleColors={['#ffffff', '#ffffff']}
-        particleCount={200}
-        particleSpread={10}
-        speed={0.1}
-        particleBaseSize={100}
-        moveParticlesOnHover={true}
-        alphaParticles={false}
-        disableRotation={false}
-      />
-      <div
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: "400px",
-          height: "auto",
-          padding: "20px",
-          backgroundColor: "rgba(26, 25, 25, 0.95)", // Added a semi-transparent background for better readability
-          borderRadius: "10px",
-          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-          zIndex: 1, // Ensure the form is on top of the particles
-        }}
-      >
-        <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Sign Up</h2>
-        <form onSubmit={handleSignUp}>
-          <div style={{ marginBottom: "20px" }}>
-            <label htmlFor="userName">Username:</label>
-            <input
-              type="text"
-              id="userName"
-              value={userName}
-              onChange={(e) => setUserName(e.target.value)}
-              style={{
-                width: "90%",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-              }}
-              required
-            />
+    <div className="wrapper">
+      <div className="card-switch">
+        <label className="switch">
+          <input
+            type="checkbox"
+            className="toggle"
+            checked={showSignUp}
+            onChange={handleToggleSignUp}
+          />
+          <span className="slider"></span>
+          <span className="card-side"></span>
+          <div className="flip-card__inner" data-active={showSignUp}>
+            <div className="flip-card__front">
+              <div className="title">Log in</div>
+              <form className="flip-card__form" onSubmit={handleLogin}>
+                <input
+                  className="flip-card__input"
+                  name="username"
+                  placeholder="Username"
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+                <input
+                  className="flip-card__input"
+                  name="password"
+                  placeholder="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                {error && !showSignUp && <div className="login-error">{error}</div>}
+                <button className="flip-card__btn" type="submit">
+                  Let`s go!
+                </button>
+              </form>
+            </div>
+            <div className="flip-card__back">
+              <div className="title">Sign up</div>
+              <form className="flip-card__form" onSubmit={handleSignUp}>
+                <input
+                  className="flip-card__input"
+                  placeholder="Username"
+                  type="text"
+                  value={signUpUsername}
+                  onChange={(e) => setSignUpUsername(e.target.value)}
+                  required
+                />
+                <input
+                  className="flip-card__input"
+                  name="email"
+                  placeholder="Email"
+                  type="email"
+                  value={signUpEmail}
+                  onChange={(e) => setSignUpEmail(e.target.value)}
+                  required
+                />
+                <input
+                  className="flip-card__input"
+                  name="password"
+                  placeholder="Password"
+                  type="password"
+                  value={signUpPassword}
+                  onChange={(e) => setSignUpPassword(e.target.value)}
+                  required
+                />
+                <input
+                  className="flip-card__input"
+                  placeholder="Contact Number"
+                  type="tel"
+                  value={signUpContactNumber}
+                  onChange={(e) => setSignUpContactNumber(e.target.value)}
+                  required
+                />
+                <label className="container">
+                  <input
+                    type="checkbox"
+                    checked={isOrganizer}
+                    onChange={handleOrganizerChange}
+                  />
+                  <span className="checkmark"></span>
+                  Organizer
+                </label>
+                {error && showSignUp && <div className="login-error">{error}</div>}
+                <button className="flip-card__btn" type="submit">
+                  Confirm!
+                </button>
+              </form>
+            </div>
           </div>
-          <div style={{ marginBottom: "20px" }}>
-            <label htmlFor="email">Email:</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={{
-                width: "90%",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-              }}
-              required
-            />
-          </div>
-          <div style={{ marginBottom: "20px" }}>
-            <label htmlFor="password">Password:</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              style={{
-                width: "90%",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-              }}
-              required
-            />
-          </div>
-          <div style={{ marginBottom: "20px" }}>
-            <label htmlFor="contactNumber">Contact Number:</label>
-            <input
-              type="text"
-              id="contactNumber"
-              value={contactNumber}
-              onChange={(e) => setContactNumber(e.target.value)}
-              style={{
-                width: "90%",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-              }}
-              required
-            />
-          </div>
-          <div style={{ marginBottom: "20px" }}>
-            <label htmlFor="role">Role:</label>
-            <select
-              id="role"
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px",
-                border: "1px solid #ccc",
-                borderRadius: "5px",
-              }}
-            >
-              <option value="attendee">Attendee</option>
-              <option value="organizer">Organizer</option>
-            </select>
-          </div>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-          {success && <p style={{ color: "green" }}>{success}</p>}
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <button
-              type="button"
-              onClick={onCancel}
-              style={{
-                backgroundColor: "red",
-                border: "none",
-                padding: "10px 20px",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              style={{
-                backgroundColor: "#4CAF50",
-                color: "white",
-                border: "none",
-                padding: "10px 20px",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              Sign Up
-            </button>
-          </div>
-        </form>
+        </label>
       </div>
     </div>
   );
 };
 
-export default SignUpForm;
+export default LoginForm;
