@@ -1,9 +1,10 @@
 import React from 'react';
 import './css/EventCard.css'; // Assuming you'll name the CSS file EventCard.css
 
-const EventCard = ({ eventName, category, date, location, userName, onBook }) => {
+const EventCard = ({ eventName, category, date, location, userName, rating, onBook }) => {
   return (
     <div className="card">
+      <div className="card-rating">{rating ? `${rating} ★` : "No Rating"}</div>
       <div className="card-content-wrapper">
         <div className="card-title">{eventName}</div>
         <div className="card-subtitle">{category}</div>

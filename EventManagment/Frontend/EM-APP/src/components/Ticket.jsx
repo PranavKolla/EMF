@@ -2,7 +2,7 @@ import React from "react";
 import "./css/Ticket.css"; // Import your CSS file
 import { jwtDecode } from "jwt-decode";
 
-const Ticket = ({ eventName, issuedBy, inviteNumber, bookingDate, status }) => {
+const Ticket = ({ eventName, issuedBy, inviteNumber, bookingDate, status, onCancel }) => {
   let usernameFromToken = "";
   const token = localStorage.getItem("jwtToken");
   if (token) {
@@ -13,6 +13,12 @@ const Ticket = ({ eventName, issuedBy, inviteNumber, bookingDate, status }) => {
       console.error("Error decoding JWT:", error);
     }
   }
+
+  const handleCancel = () => {
+    if (window.confirm(`Are you sure you want to cancel ticket #${inviteNumber}?`)) {
+      onCancel(inviteNumber); // Call the onCancel function passed as a prop
+    }
+  };
 
   return (
     <div className="ticket-container">
@@ -40,6 +46,9 @@ const Ticket = ({ eventName, issuedBy, inviteNumber, bookingDate, status }) => {
         </div>
         <div className="ticket-footer">
           <p className="footer-text">Thank you for being part of our event!</p>
+          <button className="cancel-ticket-btn" onClick={handleCancel}>
+            Cancel Ticket
+          </button>
         </div>
       </div>
     </div>

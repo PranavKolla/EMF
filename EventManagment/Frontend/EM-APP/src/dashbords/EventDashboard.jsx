@@ -40,8 +40,39 @@ const EventDashboard = () => {
         return response.json();
       })
       .then((data) => {
-        setEvents(Array.isArray(data) ? data : []);
+        const eventsWithRatings = data.map((event) => ({
+          ...event,
+          rating: null, // Initialize rating as null
+        }));
+        setEvents(eventsWithRatings);
         setLoading(false);
+
+        // Fetch ratings for each event
+        eventsWithRatings.forEach((event) => {
+          fetch(`http://localhost:9090/feedback/event/${event.eventId}/rating`, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Failed to fetch rating for event ${event.eventId}`);
+              }
+              return response.json();
+            })
+            .then((rating) => {
+              setEvents((prevEvents) =>
+                prevEvents.map((e) =>
+                  e.eventId === event.eventId ? { ...e, rating: rating || "No Rating" } : e
+                )
+              );
+            })
+            .catch((err) => {
+              console.error(`Failed to fetch rating for event ${event.eventId}:`, err.message);
+            });
+        });
       })
       .catch((err) => {
         console.error("Failed to fetch events:", err.message);
@@ -131,6 +162,7 @@ const EventDashboard = () => {
               date={new Date(event.date).toLocaleDateString()} // Correct prop: date
               location={event.location} // Correct prop: location
               userName={event.user?.userName} // Correct prop: userName
+              rating={event.rating} // Pass the rating to the EventCard
               onBook={() => handleBookEvent(event)}
             />
           </div>

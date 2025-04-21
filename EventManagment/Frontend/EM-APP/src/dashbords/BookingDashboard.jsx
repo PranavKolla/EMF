@@ -92,6 +92,83 @@ const BookingDashboard = () => {
     setSelectedBooking(booking); // Set the selected booking to display the Ticket component
   };
 
+  const handleCancelTickets = async (booking) => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      console.error("Authentication token not found. Redirecting to login.");
+      navigate("/login");
+      return;
+    }
+  
+    if (window.confirm("Are you sure you want to cancel all tickets for this event?")) {
+      try {
+        // Cancel all tickets for the selected booking
+        const cancelPromises = booking.ticketIDs.map((ticketID) =>
+          fetch(`http://localhost:9090/tickets/cancel/${ticketID}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+        );
+  
+        // Wait for all cancellation requests to complete
+        const responses = await Promise.all(cancelPromises);
+  
+        // Check if any cancellation failed
+        const failedResponses = responses.filter((response) => !response.ok);
+        if (failedResponses.length > 0) {
+          throw new Error("Failed to cancel some tickets. Please try again.");
+        }
+  
+        // Remove the canceled tickets from the state
+        setGroupedBookings((prevBookings) =>
+          prevBookings.filter((b) => b.event?.eventId !== booking.event?.eventId)
+        );
+  
+        alert("All tickets for this event have been canceled successfully!");
+      } catch (err) {
+        console.error("Error canceling tickets:", err);
+        alert("Failed to cancel tickets. Please try again.");
+      }
+    }
+  };
+
+  const handleCancelTicket = async (ticketID) => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      console.error("Authentication token not found. Redirecting to login.");
+      navigate("/login");
+      return;
+    }
+  
+    if (window.confirm(`Are you sure you want to cancel ticket #${ticketID}?`)) {
+      try {
+        const response = await fetch(`http://localhost:9090/tickets/cancel/${ticketID}`, {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        if (!response.ok) {
+          throw new Error("Failed to cancel the ticket. Please try again.");
+        }
+  
+        // Update the selected booking's ticket list
+        setSelectedBooking((prevBooking) => ({
+          ...prevBooking,
+          ticketIDs: prevBooking.ticketIDs.filter((id) => id !== ticketID),
+        }));
+  
+        alert(`Ticket #${ticketID} has been canceled successfully!`);
+      } catch (err) {
+        console.error("Error canceling ticket:", err);
+        alert("Failed to cancel the ticket. Please try again.");
+      }
+    }
+  };
+  
   if (loading) {
     return <div>Loading your bookings...</div>;
   }
@@ -105,7 +182,6 @@ const BookingDashboard = () => {
       <Navbar />
       <div className="dashboard-content">
         {selectedBooking ? (
-          // Show the Ticket component if a booking is selected
           <div className="ticket-list">
             <h2>Tickets for {selectedBooking.event?.name}</h2>
             {selectedBooking.ticketIDs.map((ticketID) => (
@@ -116,12 +192,12 @@ const BookingDashboard = () => {
                 inviteNumber={ticketID}
                 bookingDate={selectedBooking.event?.date}
                 status={selectedBooking.status}
+                onCancel={handleCancelTicket} // Pass the cancel handler
               />
             ))}
             <button onClick={handleGoBack}>Back to Bookings</button>
           </div>
         ) : (
-          // Show the booking list if no booking is selected
           <>
             <h2>Your Bookings</h2>
             {groupedBookings.length === 0 ? (
@@ -137,6 +213,7 @@ const BookingDashboard = () => {
                     location={booking.event?.location}
                     organizerName={booking.event?.user?.userName}
                     onView={() => handleViewTicket(booking)}
+                    onCancel={() => handleCancelTickets(booking)} // Pass the cancel handler
                   />
                 ))}
               </div>

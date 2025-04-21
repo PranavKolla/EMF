@@ -186,3 +186,19 @@
   color: #666; /* Medium gray for the footer text */
   margin: 0;
 }
+
+.cancel-ticket-btn {
+  background-color: #dc3545;
+  color: #ffffff;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+  margin-top: 10px;
+}
+
+.cancel-ticket-btn:hover {
+  background-color: #c82333;
+}
