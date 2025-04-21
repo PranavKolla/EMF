@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import './css/Navbar.css';
 import { Bell as NotificationsIcon, User as UserIcon } from 'react-feather';
 import { jwtDecode } from 'jwt-decode';
+import Notification from './Notification'; // Import Notification component
+import UpdateUserForm from './UpdateUserForm'; // Import UpdateUserForm component
 
 const Navbar = () => {
   const [username, setUsername] = useState('');
@@ -11,6 +13,8 @@ const Navbar = () => {
   const [userDetails, setUserDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [errorDetails, setErrorDetails] = useState('');
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isUpdateUserOpen, setIsUpdateUserOpen] = useState(false); // State for update user form
   const userInfoRef = useRef(null);
   const userSectionRef = useRef(null); // Ref for the user-section div
   const navigate = useNavigate();
@@ -62,6 +66,10 @@ const Navbar = () => {
     navigate('/login');
   };
 
+  const handleUpdateUser = () => {
+    setIsUpdateUserOpen(true); // Open the update user form
+  };
+
   const closeUserInfo = (e) => {
     if (userSectionRef.current && !userSectionRef.current.contains(e.target)) {
       setIsUserInfoOpen(false);
@@ -75,51 +83,71 @@ const Navbar = () => {
     };
   }, [isUserInfoOpen]);
 
+  const toggleNotifications = () => {
+    setIsNotificationOpen(!isNotificationOpen);
+  };
+
   return (
-    <nav className="navbar">
-      <div className="navbar-brand">
-        <Link to="/" className="brand-link">Your App Name</Link>
-      </div>
-      <ul className="navbar-menu">
-        <li className="nav-item">
-          <Link to="/home" className="nav-link">Home</Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/events" className="nav-link">Events</Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/bookings" className="nav-link">Bookings</Link>
-        </li>
-        <li className="nav-item">
-          <Link to="/feedback" className="nav-link">Feedback</Link>
-        </li>
-      </ul>
-      <div className="navbar-actions">
-        <button className="action-button notification-button">
-          <NotificationsIcon size={24} color="#f8f8f2" />
-        </button>
-        <div className={`user-section ${isUserInfoOpen ? 'active' : ''}`} ref={userSectionRef}>
-          <button className="action-button user-button" onClick={fetchUserDetails}>
-            <UserIcon size={24} color="#f8f8f2" className="user-icon" />
-            <span className="username">{username || 'User'}</span>
-          </button>
-          {isUserInfoOpen && (
-            <div className="user-info-popup" ref={userInfoRef}>
-              {loadingDetails && <div className="loading">Loading...</div>}
-              {errorDetails && <div className="error">{errorDetails}</div>}
-              {userDetails && (
-                <div>
-                  <p>Username: {userDetails.userName}</p>
-                  <p>Email: {userDetails.email}</p>
-                  <p>Contact: {userDetails.contactNumber}</p>
-                </div>
-              )}
-              <button className="logout-button" onClick={handleLogout}>Logout</button>
-            </div>
-          )}
+    <>
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <Link to="/" className="brand-link">Your App Name</Link>
         </div>
-      </div>
-    </nav>
+        <ul className="navbar-menu">
+          <li className="nav-item">
+            <Link to="/home" className="nav-link">Home</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/events" className="nav-link">Events</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/bookings" className="nav-link">Bookings</Link>
+          </li>
+          <li className="nav-item">
+            <Link to="/feedback" className="nav-link">Feedback</Link>
+          </li>
+        </ul>
+        <div className="navbar-actions">
+          <button className="action-button notification-button" onClick={toggleNotifications}>
+            <NotificationsIcon size={24} color="#f8f8f2" />
+          </button>
+          {isNotificationOpen && (
+            <Notification
+              onClose={() => setIsNotificationOpen(false)}
+            />
+          )}
+          <div className={`user-section ${isUserInfoOpen ? 'active' : ''}`} ref={userSectionRef}>
+            <button className="action-button user-button" onClick={fetchUserDetails}>
+              <UserIcon size={24} color="#f8f8f2" className="user-icon" />
+              <span className="username">{username || 'User'}</span>
+            </button>
+            {isUserInfoOpen && (
+              <div className="user-info-popup" ref={userInfoRef}>
+                {loadingDetails && <div className="loading">Loading...</div>}
+                {errorDetails && <div className="error">{errorDetails}</div>}
+                {userDetails && (
+                  <div className="user-details">
+                    <p><strong>Username:</strong> {userDetails.userName}</p>
+                    <p><strong>Email:</strong> {userDetails.email}</p>
+                    <p><strong>Contact:</strong> {userDetails.contactNumber}</p>
+                  </div>
+                )}
+                <div className="user-actions">
+                  <button className="logout-button" onClick={handleLogout}>Logout</button>
+                  <button className="update-button" onClick={handleUpdateUser}>Update User</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </nav>
+      {isUpdateUserOpen && (
+        <UpdateUserForm
+          userDetails={userDetails}
+          onClose={() => setIsUpdateUserOpen(false)}
+        />
+      )}
+    </>
   );
 };
 

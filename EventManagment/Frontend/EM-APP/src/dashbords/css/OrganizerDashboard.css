@@ -1,30 +1,226 @@
-/* OrganizerDashboard.css */
-.card {
-    position: relative;
-    margin: 16px;
-    padding: 16px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #fff;
+/* General container styling */
+.organizer-dashboard-container {
+  font-family: 'Arial', sans-serif;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f9f9f9; /* Light background color */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
+  min-height: 100vh;
+}
+
+/* Title styling */
+.dashboard-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Button styling */
+.dashboard-button {
+  margin: 10px;
+  padding: 10px 20px;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #007bff; /* Primary blue color */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dashboard-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* Events grid layout */
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+  gap: 20px;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* Event card styling */
+.event-card {
+  background-color: #ffffff; /* White background for the card */
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+}
+
+.event-card:hover {
+  transform: translateY(-5px); /* Lift effect on hover */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Stronger shadow on hover */
+}
+
+.event-card-header {
+  background-color: #007bff; /* Blue header */
+  color: #ffffff;
+  padding: 15px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.event-card-content {
+  padding: 15px;
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.5;
+  margin-bottom: 10px;
+}
+
+/* Card footer (buttons) */
+.event-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-top: 1px solid #ddd;
+}
+
+.event-card-footer button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.event-card-footer button.update-button {
+  background-color: #28a745; /* Green for update */
+  color: #ffffff;
+}
+
+.event-card-footer button.update-button:hover {
+  background-color: #218838;
+}
+
+.event-card-footer button.delete-button {
+  background-color: #dc3545; /* Red for delete */
+  color: #ffffff;
+}
+
+.event-card-footer button.delete-button:hover {
+  background-color: #c82333;
+}
+
+.event-card-footer button.view-feedback-button {
+  background-color: #ffc107; /* Yellow for view feedback */
+  color: #333;
+}
+
+.event-card-footer button.view-feedback-button:hover {
+  background-color: #e0a800;
+}
+
+/* Feedback List */
+.feedback-list {
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-list h2 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.feedback-card {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.feedback-card p {
+  margin: 5px 0;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.feedback-card p strong {
+  color: #333;
+}
+
+.feedback-list button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.feedback-list button:hover {
+  background-color: #0056b3;
+}
+
+/* Loading and error messages */
+.loading {
+  font-size: 1.2rem;
+  color: #555;
+  margin-top: 20px;
+}
+
+.error {
+  color: red;
+  font-weight: bold;
+  font-size: 1.2rem;
+  margin-top: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .dashboard-title {
+    font-size: 1.5rem;
   }
-  
-  .cardHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+
+  .dashboard-button {
+    font-size: 0.9rem;
+    padding: 8px 16px;
   }
-  
-  .cardContent {
-    margin-top: 16px;
+
+  .event-card {
+    padding: 15px;
   }
-  
-  .activeDot {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 10px;
-    height: 10px;
-    background-color: green;
-    border-radius: 50%;
+
+  .event-card-header {
+    font-size: 1rem;
   }
-  
+
+  .event-card-content {
+    font-size: 0.9rem;
+  }
+}
