@@ -139,6 +139,8 @@
     margin-bottom: 20px;
     resize: none;
     box-sizing: border-box;
+    background-color: #f9f9f9; /* Light white background */
+    color: #333; /* Dark text color for readability */
   }
   
   .rating-container {
@@ -160,6 +162,8 @@
     border: 1px solid #ddd;
     border-radius: 5px;
     text-align: center;
+    background-color: #f9f9f9; /* Light white background */
+    color: #333; /* Dark text color for readability */
   }
   
   .submit-button {

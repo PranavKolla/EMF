@@ -117,23 +117,34 @@ function FeedbackDashboard() {
       });
 
       if (!response.ok) {
+        // Check if the response is JSON or plain text
+        const contentType = response.headers.get('Content-Type');
         let errorMessage = `Failed to submit feedback: ${response.status}`;
-        try {
+        if (contentType && contentType.includes('application/json')) {
           const errorData = await response.json();
-          errorMessage += ` - ${errorData.message || response.statusText}`;
-        } catch (jsonError) {
-          errorMessage += ` - ${response.statusText}`;
+          errorMessage = errorData.message || errorMessage;
+        } else {
+          errorMessage = await response.text(); // Handle plain text response
         }
-        throw new Error(errorMessage);
+
+        // Extract the relevant part of the error message
+        const extractedMessage = extractValidationMessage(errorMessage);
+        throw new Error(extractedMessage);
       }
 
       setFeedbackSubmitLoading(false);
       setFeedbackSubmitSuccess(true);
     } catch (err) {
       console.error('Error submitting feedback:', err);
-      setFeedbackSubmitError(err.message);
+      window.alert(err.message); // Show clean error message in a popup
       setFeedbackSubmitLoading(false);
     }
+  };
+
+  // Helper function to extract the relevant validation message
+  const extractValidationMessage = (errorMessage) => {
+    const match = errorMessage.match(/Feedback must be between 5 and 500 characters/);
+    return match ? match[0] : 'An unexpected error occurred. Please try again.';
   };
 
   return (

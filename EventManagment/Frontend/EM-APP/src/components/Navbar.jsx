@@ -91,7 +91,7 @@ const Navbar = () => {
     <>
       <nav className="navbar">
         <div className="navbar-brand">
-          <Link to="/" className="brand-link">Your App Name</Link>
+          <Link to="/" className="brand-link">EVE OF EVENTS</Link>
         </div>
         <ul className="navbar-menu">
           <li className="nav-item">
