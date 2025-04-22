@@ -1,39 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from "jwt-decode";
-import './css/Home.css';
-import Navbar from '../components/Navbar'; // Import the new Navbar component
-import {
-  Button,
-  Container,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  CircularProgress,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemSecondaryAction,
-  IconButton,
-  Typography,
-  Badge,
-  InputBase,
-} from '@mui/material';
-import { Search as SearchIcon, Close as CloseIcon } from '@mui/icons-material';
+import './css/Home.css'; // Ensure this file contains the new styles
+import Navbar from '../components/Navbar';
+import EventCard from '../components/EventCard'; // Import the EventCard component
+import axios from 'axios'; // Import Axios
 
 function Home() {
   const [username, setUsername] = useState('');
   const [userId, setUserId] = useState('');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [userDetails, setUserDetails] = useState(null);
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [errorDetails, setErrorDetails] = useState('');
+  const [events, setEvents] = useState([]); // Store all events
+  const [filteredEvents, setFilteredEvents] = useState([]); // Store filtered events
+  const [searchQuery, setSearchQuery] = useState(''); // Store search input
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState([]);
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [loadingNotifications, setLoadingNotifications] = useState(true);
-  const [errorNotifications, setErrorNotifications] = useState('');
 
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
@@ -46,73 +25,80 @@ function Home() {
         console.error('Invalid token:', error);
       }
     }
+
+    // Fetch all events
+    fetchEvents();
   }, []);
 
-  useEffect(() => {
-    if (userId) {
-      fetchNotifications();
+  const fetchEvents = async () => {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      console.error('No token found. Redirecting to login.');
+      navigate('/login');
+      return;
     }
-  }, [userId]);
 
-  const fetchNotifications = async () => {
-    setLoadingNotifications(true);
-    setErrorNotifications('');
     try {
-      const token = localStorage.getItem('jwtToken');
-      const response = await fetch(`http://localhost:9090/notifications/usernotify/${userId}`, {
+      const response = await axios.get('http://localhost:9090/events/view/all', {
         headers: {
-          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to fetch notifications: ${response.status} - ${errorData.message || response.statusText}`);
-      }
-      const data = await response.json();
-      setNotifications(data);
-      setLoadingNotifications(false);
+
+      setEvents(response.data);
     } catch (error) {
-      console.error('Error fetching notifications:', error);
-      setErrorNotifications(error.message);
-      setLoadingNotifications(false);
+      console.error('Error fetching events:', error.response?.data?.message || error.message);
     }
   };
 
-  const handleDeleteNotification = async (notificationId) => {
-    console.log('Deleting notification with ID:', notificationId);
+  const handleSearchChange = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+
+    // Filter events based on the search query
+    const filtered = events.filter((event) =>
+      event.name.toLowerCase().includes(query)
+    );
+    setFilteredEvents(filtered);
+  };
+
+  const handleBookEvent = async (eventId) => {
+    const token = localStorage.getItem('jwtToken');
+
+    if (!token) {
+      console.error('Authentication token not found. Redirecting to login.');
+      navigate('/login');
+      return;
+    }
+
+    let userId;
     try {
-      const token = localStorage.getItem('jwtToken');
-      const response = await fetch(
-        `http://localhost:9090/notifications/deletenotify/${notificationId}`,
+      const decodedToken = jwtDecode(token);
+      userId = decodedToken.userId;
+    } catch (err) {
+      console.error('Failed to decode token:', err.message);
+      navigate('/login');
+      return;
+    }
+
+    try {
+      const response = await axios.post(
+        `http://localhost:9090/tickets/book`,
+        null,
         {
-          method: 'PUT', // Changed to PUT as per your code
+          params: { eventId, userId },
           headers: {
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
         }
       );
 
-      if (!response.ok) {
-        let errorMessage = `Failed to delete notification: ${response.status}`;
-        try {
-          const errorText = await response.text(); // Try to get the error message as text
-          errorMessage += ` - ${errorText}`;
-        } catch (textError) {
-          console.error("Failed to parse error text:", textError);
-          errorMessage += ` - ${response.statusText}`;
-        }
-        throw new Error(errorMessage);
-      }
-
-      // If the response is successful (response.ok is true),
-      // we don't necessarily need to parse JSON.
-      // We can just assume success and refresh the notifications.
-      console.log('Notification deleted successfully (no JSON expected)');
-      fetchNotifications();
-
+      alert(`Booking successful! Ticket ID: ${response.data.ticketID}`);
     } catch (error) {
-      console.error('Error deleting notification:', error);
-      // Optionally, show an error message to the user
+      console.error('Error during booking:', error.response?.data?.message || error.message);
+      alert(`Failed to book ticket: ${error.response?.data?.message || error.message}`);
     }
   };
 
@@ -120,137 +106,55 @@ function Home() {
     navigate('/events');
   };
 
-  const handleUsernameClick = async () => {
-    setIsDialogOpen(true);
-    setLoadingDetails(true);
-    setUserDetails(null);
-    setErrorDetails('');
-
-    try {
-      const token = localStorage.getItem('jwtToken');
-      const response = await fetch(`http://localhost:9090/users/${userId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to fetch user details: ${response.status} - ${errorData.message || response.statusText}`);
-      }
-
-      const data = await response.json();
-      setUserDetails(data);
-      setLoadingDetails(false);
-    } catch (error) {
-      console.error('Error fetching user details:', error);
-      setErrorDetails(error.message);
-      setLoadingDetails(false);
-    }
-  };
-
-  const handleDialogClose = () => {
-    setIsDialogOpen(false);
-    setUserDetails(null);
-    setErrorDetails('');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('jwtToken');
-    navigate('/login');
-  };
-
-  const toggleNotificationDrawer = () => {
-    setIsNotificationOpen(!isNotificationOpen);
-  };
-
   return (
     <div className="root">
-      <Navbar username={username} /> {/* Use the new Navbar component and pass the username */}
-
-      {isNotificationOpen && (
-        <div className="notification-drawer">
-          <Dialog open={isNotificationOpen} onClose={toggleNotificationDrawer}>
-            <DialogTitle>Notifications</DialogTitle>
-            <DialogContent>
-              {loadingNotifications && <CircularProgress />}
-              {errorNotifications && <Typography color="error">{errorNotifications}</Typography>}
-              {!loadingNotifications && notifications.length === 0 && (
-                <Typography>No new notifications.</Typography>
-              )}
-              {!loadingNotifications && notifications.length > 0 && (
-                <List>
-                  {notifications.map((notification) => (
-                    <ListItem key={notification.id}>
-                      <ListItemText primary={notification.message} secondary={new Date(notification.createdAt).toLocaleString()} />
-                      <ListItemSecondaryAction>
-                        <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteNotification(notification.id)}>
-                          <CloseIcon />
-                        </IconButton>
-                      </ListItemSecondaryAction>
-                    </ListItem>
-                  ))}
-                </List>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={toggleNotificationDrawer} color="primary">
-                Close
-              </Button>
-            </DialogActions>
-          </Dialog>
-        </div>
-      )}
+      <Navbar username={username} />
 
       <div className="centered-container">
-        <Container className="searchBarContainer">
-          <InputBase
-            placeholder="Hinted search text"
-            className="searchInputBase"
-            startAdornment={<SearchIcon />}
+        {/* Functional Search Bar */}
+        <div className="brutalist-container">
+          <input
+            placeholder="Search Events"
+            className="brutalist-input smooth-type"
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange} // Handle search input
           />
-        </Container>
+          <label className="brutalist-label">Search Events</label>
+        </div>
 
-        <Container className="mainContentContainer">
-          <Typography variant="h4" align="center">
-            THE LAND OF EVENTS
-          </Typography>
-          <Typography variant="subtitle1" align="center">
-            SMALL DESCRIPTION ABOUT SITE
-          </Typography>
-          <Button variant="contained" color="primary" className="exploreButton" onClick={handleExploreClick}>
+        {/* Display Filtered Events Only After Search */}
+        {searchQuery && filteredEvents.length > 0 && (
+          <div className="events-grid">
+            {filteredEvents.map((event) => (
+              <div key={event.eventId} className="event-card-wrapper">
+                <EventCard
+                  eventName={event.name}
+                  category={event.category}
+                  date={new Date(event.date).toLocaleDateString()}
+                  location={event.location}
+                  userName={event.organizerName}
+                  rating={event.rating}
+                  onBook={() => handleBookEvent(event.eventId)} // Pass booking handler
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Show message if no events match the search */}
+        {searchQuery && filteredEvents.length === 0 && (
+          <p className="no-events-message">No events found for your search.</p>
+        )}
+
+        <div className="mainContentContainer">
+          <h1 className="title">THE LAND OF EVENTS</h1>
+          <p className="subtitle">SMALL DESCRIPTION ABOUT SITE</p>
+          <button className="exploreButton" onClick={handleExploreClick}>
             Explore
-          </Button>
-        </Container>
+          </button>
+        </div>
       </div>
-
-      <Dialog open={isDialogOpen} onClose={handleDialogClose}>
-        <DialogTitle>User Details</DialogTitle>
-        <DialogContent>
-          {loadingDetails && <CircularProgress />}
-          {errorDetails && <Typography color="error">{errorDetails}</Typography>}
-          {userDetails && (
-            <div>
-              <Typography>User ID: {userDetails.userid || userId}</Typography>
-              <Typography>Username: {userDetails.username || username}</Typography>
-              <Typography>Contact Number: {userDetails.contactNumber}</Typography>
-              <Typography>Email: {userDetails.email}</Typography>
-              {/* <Typography>API Endpoint: /users/{userId}</Typography> */}
-            </div>
-          )}
-          {!loadingDetails && !userDetails && !errorDetails && (
-            <Typography>Fetching user details...</Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleLogout} color="primary">
-            Logout
-          </Button>
-          <Button onClick={handleDialogClose} color="secondary">
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 }

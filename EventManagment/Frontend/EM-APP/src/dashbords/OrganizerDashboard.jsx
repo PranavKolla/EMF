@@ -1,34 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Button } from '@mui/material';
-import  { jwtDecode } from 'jwt-decode';
-import EventCard from '../components/EventCard';
+import { jwtDecode } from 'jwt-decode';
+
 import EventFormDialog from '../components/EventFormDialog';
-import UserFormDialog from '../components/UserFormDialog';
+
 import './css/OrganizerDashboard.css'; // Import your CSS file
- 
+import Navbar from '../components/Navbar'; // Import the Navbar component
+
 const OrganizerDashboard = () => {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openEventForm, setOpenEventForm] = useState(false);
-  const [openUserForm, setOpenUserForm] = useState(false); // State for user form dialog
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [selectedUser, setSelectedUser] = useState(null); // State for selected user
   const [isCreating, setIsCreating] = useState(false);
- 
+  const [feedbacks, setFeedbacks] = useState([]); // State to store feedbacks
+  const [viewingFeedback, setViewingFeedback] = useState(false); // State to toggle feedback view
+
   useEffect(() => {
     const token = localStorage.getItem('jwtToken');
- 
+
     if (!token) {
       setError('No token found. Please log in.');
       setLoading(false);
       return;
     }
- 
+
     try {
       const decodedToken = jwtDecode(token);
       const userId = decodedToken.userId;
- 
+
       // Fetch events
       fetch(`http://localhost:9090/events/user/${userId}`, {
         method: 'GET',
@@ -51,88 +51,25 @@ const OrganizerDashboard = () => {
           setError(`Failed to fetch events: ${error.message}`);
           setLoading(false);
         });
- 
-      // Fetch user details
-      fetch(`http://localhost:9090/users/${userId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          setSelectedUser(data); // Set the fetched user details
-        })
-        .catch(error => {
-          setError(`Failed to fetch user details: ${error.message}`);
-        });
     } catch (err) {
       setError('Invalid token. Please log in again.');
       setLoading(false);
     }
   }, []);
- 
-  const handleUpdateUser = () => {
-    setOpenUserForm(true); // Open the user form dialog
-  };
- 
-  const handleSaveUser = () => {
-    const token = localStorage.getItem('jwtToken');
- 
-    // Prepare the body for the update request
-    const updatedUser = {
-      userName: selectedUser.userName,
-      email: selectedUser.email,
-      contactNumber: selectedUser.contactNumber,
-    };
- 
-    // Include the password only if it is not empty
-    if (selectedUser.password && selectedUser.password.trim() !== '') {
-      updatedUser.password = selectedUser.password;
-    }
- 
-    fetch(`http://localhost:9090/users/update/${selectedUser.userId}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(updatedUser), // Send the updated user details
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        setOpenUserForm(false); // Close the user form dialog
-      })
-      .catch((error) => {
-        setError(`Failed to update user: ${error.message}`);
-      });
-  };
- 
-  const handleCancelUser = () => {
-    setOpenUserForm(false); // Close the user form dialog
-  };
- 
+
   const handleCreateEvent = () => {
     setIsCreating(true);
     setSelectedEvent({ name: '', category: '', location: '', date: '' }); // Initialize the form with empty values
     setOpenEventForm(true);
   };
- 
-  const handleUpdateEvent = (event) => {
+
+  const handleUpdateEvent = event => {
     setIsCreating(false);
     setSelectedEvent(event);
     setOpenEventForm(true);
   };
- 
-  const handleDeleteEvent = (eventId) => {
+
+  const handleDeleteEvent = eventId => {
     const token = localStorage.getItem('jwtToken');
     if (window.confirm('Are you sure you want to delete this event?')) {
       fetch(`http://localhost:9090/events/manage/delete/${eventId}`, {
@@ -147,15 +84,13 @@ const OrganizerDashboard = () => {
           }
           // Remove the deleted event from the local state
           setEvents(prevEvents => prevEvents.filter(event => event.eventId !== eventId));
-          // Optionally, show a success message
         })
         .catch(error => {
           setError(`Failed to delete event: ${error.message}`);
-          // Optionally, show an error message
         });
     }
   };
- 
+
   const handleSaveEvent = () => {
     const token = localStorage.getItem('jwtToken');
     const userId = jwtDecode(token).userId;
@@ -163,7 +98,7 @@ const OrganizerDashboard = () => {
       ? 'http://localhost:9090/events/manage/create'
       : `http://localhost:9090/events/manage/update/${selectedEvent?.eventId}`;
     const method = isCreating ? 'POST' : 'PUT';
- 
+
     fetch(apiUrl, {
       method: method,
       headers: {
@@ -191,68 +126,110 @@ const OrganizerDashboard = () => {
         setOpenEventForm(false);
         setIsCreating(false);
         setSelectedEvent(null);
-        // Optionally, show a success message
       })
       .catch(error => {
         setError(`Failed to ${isCreating ? 'create' : 'update'} event: ${error.message}`);
-        // Optionally, show an error message to the user
       });
   };
- 
+
   const handleCancelEvent = () => {
     setOpenEventForm(false);
     setIsCreating(false);
     setSelectedEvent(null);
   };
- 
+
+  const handleViewFeedback = async (eventId) => {
+    const token = localStorage.getItem('jwtToken');
+    setViewingFeedback(true);
+    try {
+      const response = await fetch(`http://localhost:9090/feedback/event/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch feedbacks');
+      }
+
+      const data = await response.json();
+      setFeedbacks(data);
+    } catch (error) {
+      console.error('Error fetching feedbacks:', error);
+      setError('Failed to fetch feedbacks.');
+    }
+  };
+
+  const handleBackToEvents = () => {
+    setViewingFeedback(false);
+    setFeedbacks([]);
+  };
+
   if (loading) {
-    return <Typography variant="h6">Loading events...</Typography>;
+    return <div className="loading">Loading events...</div>;
   }
- 
+
   if (error) {
-    return <Typography variant="h6" color="error">{error}</Typography>;
+    return <div className="error">{error}</div>;
   }
- 
+
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
-        Organizer Dashboard
-      </Typography>
-      <Button variant="contained" color="primary" onClick={handleUpdateUser} style={{ marginBottom: '20px' }}>
-        Update User
-      </Button>
-      <Button variant="contained" color="primary" onClick={handleCreateEvent} style={{ marginBottom: '20px' }}>
-        Create Event
-      </Button>
-      {Array.isArray(events) && events.length === 0 ? (
-        <Typography variant="h6">No events available.</Typography>
-      ) : (
-        events.map(event => (
-          <EventCard
-            key={event.eventId}
-            event={event}
-            onUpdate={() => handleUpdateEvent(event)}
-            onDelete={() => handleDeleteEvent(event.eventId)}
-          />
-        ))
-      )}
-      <EventFormDialog
-        open={openEventForm}
-        isCreating={isCreating}
-        selectedEvent={selectedEvent}
-        onChange={setSelectedEvent}
-        onCancel={handleCancelEvent}
-        onSave={handleSaveEvent}
-      />
-      <UserFormDialog
-        open={openUserForm}
-        selectedUser={selectedUser}
-        onChange={setSelectedUser}
-        onCancel={handleCancelUser}
-        onSave={handleSaveUser}
-      />
-    </Container>
+    <>
+      <Navbar />
+      <div className="organizer-dashboard-container">
+        <h1 className="dashboard-title">Organizer Dashboard</h1>
+        {viewingFeedback ? (
+          <div className="feedback-list">
+            <h2>Feedbacks</h2>
+            {feedbacks.length === 0 ? (
+              <p>No feedbacks found for this event.</p>
+            ) : (
+              feedbacks.map(feedback => (
+                <div className="feedback-card" key={feedback.feedbackId}>
+                  <p><strong>Message:</strong> {feedback.message}</p>
+                  <p><strong>Rating:</strong> {feedback.rating} / 5</p>
+                </div>
+              ))
+            )}
+            <button onClick={handleBackToEvents}>Back to Events</button>
+          </div>
+        ) : (
+          <>
+            <button className="dashboard-button" onClick={handleCreateEvent}>
+              Create Event
+            </button>
+            <div className="events-grid">
+              {events.map(event => (
+                <div className="event-card" key={event.eventId}>
+                  <div className="event-card-header">{event.name}</div>
+                  <div className="event-card-content">{event.description}</div>
+                  <div className="event-card-footer">
+                    <button className="update-button" onClick={() => handleUpdateEvent(event)}>
+                      Update
+                    </button>
+                    <button className="delete-button" onClick={() => handleDeleteEvent(event.eventId)}>
+                      Delete
+                    </button>
+                    <button className="view-feedback-button" onClick={() => handleViewFeedback(event.eventId)}>
+                      View Feedback
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+        <EventFormDialog
+          open={openEventForm}
+          isCreating={isCreating}
+          selectedEvent={selectedEvent}
+          onChange={setSelectedEvent}
+          onCancel={handleCancelEvent}
+          onSave={handleSaveEvent}
+        />
+      </div>
+    </>
   );
 };
- 
+
 export default OrganizerDashboard;

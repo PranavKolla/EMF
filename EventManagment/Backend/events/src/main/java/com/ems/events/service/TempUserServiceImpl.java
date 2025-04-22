@@ -50,8 +50,18 @@ public class TempUserServiceImpl implements TempUserService {
         // Delete the TempUser from the TempUser table
         tempUserRepository.delete(tempUser);
     }
+
     @Override
-public List<TempUser> getAllTempUsers() {
-    return tempUserRepository.findAll();
-}
+    public void disapproveTempUser(Long tempUserId) {
+        TempUser tempUser = tempUserRepository.findById(tempUserId)
+                .orElseThrow(() -> new UserNotFoundException("TempUser not found"));
+
+        // Delete the TempUser from the TempUser table
+        tempUserRepository.delete(tempUser);
+    }
+
+    @Override
+    public List<TempUser> getAllTempUsers() {
+        return tempUserRepository.findAll();
+    }
 }

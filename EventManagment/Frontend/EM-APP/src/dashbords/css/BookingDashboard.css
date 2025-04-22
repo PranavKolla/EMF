@@ -1,0 +1,126 @@
+
+.booking-dashboard {
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f4f4f4;
+  color: #333;
+  width: 100vw; /* Make the window wider */
+}
+
+.dashboard-content {
+  padding: 20px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center content horizontally */
+}
+
+.dashboard-content h2 {
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.booking-list {
+  display: flex; /* Change to flexbox for horizontal spacing */
+  flex-wrap: wrap; /* Allow cards to wrap to the next line */
+  gap: 10px; /* Horizontal and vertical spacing between cards */
+  justify-content: flex-start; /* Align items to the start, adjust as needed */
+  width: 95%; /* Adjust width as needed, slightly less than 100vw for padding */
+  max-width: 1200px; /* Optional maximum width */
+  margin-bottom: 20px;
+}
+
+.booking-list > * { /* Target direct children (BookingCard components) */
+  margin-right: 0; /* Remove default right margin from grid */
+  margin-bottom: 10px; /* Add vertical spacing if needed */
+}
+
+/* For larger screens, you might want a grid layout with horizontal spacing */
+@media (min-width: 768px) {
+  .booking-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px; /* Adjust gap for larger screens */
+  }
+
+  .booking-list > * {
+    margin-right: 0; /* Reset right margin for grid layout */
+    margin-bottom: 20px; /* Add vertical spacing for grid layout */
+  }
+}
+
+.booking-list p {
+  text-align: center;
+  color: #777;
+  width: 100%; /* Ensure the "No bookings found" message takes full width */
+}
+
+.dashboard-content .dashbord-buttons {
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  margin-top: 20px; /* Add some space above the button */
+}
+
+.dashboard-content .dashbord-buttons:hover {
+  background-color: #218838;
+}
+
+/* Modal Styles (No changes needed for this request) */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's on top */
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  position: relative; /* For close button positioning */
+  width: 80%;
+  max-width: 500px;
+}
+
+.modal-content h3 {
+  color: #007bff;
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.modal-content p {
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.close-button:hover {
+  color: #333;
+}

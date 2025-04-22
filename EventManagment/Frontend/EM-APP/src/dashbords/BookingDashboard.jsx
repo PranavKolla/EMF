@@ -1,30 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Typography,
-  Container,
-  CircularProgress,
-  Card,
-  CardContent,
-  Button,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Grid,
-  Modal,
-  Box,
-} from '@mui/material';
-import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import BookingCard from '../components/BookingCard'; // Adjust the path if needed
+import Navbar from '../components/Navbar'; // Adjust the path if needed
 import Ticket from '../components/Ticket'; // Import the Ticket component
-import CloseIcon from '@mui/icons-material/Close'; // Import close icon for the modal
+import './css/BookingDashboard.css'; // You can reuse or modify this CSS
+import axios from 'axios'; // Import Axios
 
-function BookingDashboard() {
+const BookingDashboard = () => {
   const [bookings, setBookings] = useState([]);
+  const [groupedBookings, setGroupedBookings] = useState([]); // State for grouped bookings
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [selectedTicket, setSelectedTicket] = useState(null); // State to hold the ticket data for the modal
-  const [openModal, setOpenModal] = useState(false); // State to control the modal visibility
+  const [selectedBooking, setSelectedBooking] = useState(null); // State to store the selected booking
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,46 +31,62 @@ function BookingDashboard() {
       setError('No authentication token found.');
       setLoading(false);
     }
-  }, []);
+  }, [navigate]);
 
   const fetchBookings = async (currentUserId, authToken) => {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`http://localhost:9090/tickets/userTicket/${currentUserId}`, {
+      const response = await axios.get(`http://localhost:9090/tickets/userTicket/${currentUserId}`, {
         headers: {
-          'Authorization': `Bearer ${authToken}`,
+          Authorization: `Bearer ${authToken}`,
         },
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to fetch bookings: ${response.status} - ${errorData.message || response.statusText}`);
-      }
-      const data = await response.json();
-      setBookings(data);
+
+      // Group bookings by event
+      const grouped = groupBookingsByEvent(response.data);
+      setGroupedBookings(grouped);
+      setBookings(response.data);
       setLoading(false);
     } catch (err) {
       console.error('Error fetching bookings:', err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
       setLoading(false);
     }
   };
 
+  const groupBookingsByEvent = (bookings) => {
+    const grouped = {};
+    bookings.forEach((booking) => {
+      const eventId = booking.event?.eventId;
+      if (!grouped[eventId]) {
+        grouped[eventId] = {
+          ...booking,
+          ticketIDs: [booking.ticketID], // Initialize ticketIDs array
+        };
+      } else {
+        grouped[eventId].ticketIDs.push(booking.ticketID); // Add ticketID to the array
+      }
+    });
+    return Object.values(grouped).map((group) => ({
+      ...group,
+      ticketID: group.ticketIDs.join('/'), // Combine ticket IDs into a single string
+    }));
+  };
+
   const handleGoBack = () => {
-    navigate('/');
+    if (selectedBooking) {
+      setSelectedBooking(null); // Go back to the booking list
+    } else {
+      navigate('/');
+    }
   };
 
-  const handleViewTicket = (ticket) => {
-    setSelectedTicket(ticket);
-    setOpenModal(true);
+  const handleViewTicket = (booking) => {
+    setSelectedBooking(booking); // Set the selected booking to display the Ticket component
   };
 
-  const handleCloseModal = () => {
-    setOpenModal(false);
-    setSelectedTicket(null);
-  };
-
-  const handleDeleteTicket = async (ticketId) => {
+  const handleCancelTickets = async (booking) => {
     const token = localStorage.getItem('jwtToken');
     if (!token) {
       console.error('Authentication token not found. Redirecting to login.');
@@ -90,139 +94,123 @@ function BookingDashboard() {
       return;
     }
 
-    try {
-      const response = await fetch(`http://localhost:9090/tickets/cancel/${ticketId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+    if (window.confirm('Are you sure you want to cancel all tickets for this event?')) {
+      try {
+        // Cancel all tickets for the selected booking
+        const cancelPromises = booking.ticketIDs.map((ticketID) =>
+          axios.put(`http://localhost:9090/tickets/cancel/${ticketID}`, null, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          })
+        );
 
-      if (!response.ok) {
-        throw new Error('Failed to delete ticket');
+        // Wait for all cancellation requests to complete
+        const responses = await Promise.all(cancelPromises);
+
+        // Check if any cancellation failed
+        const failedResponses = responses.filter((response) => response.status !== 200);
+        if (failedResponses.length > 0) {
+          throw new Error('Failed to cancel some tickets. Please try again.');
+        }
+
+        // Remove the canceled tickets from the state
+        setGroupedBookings((prevBookings) =>
+          prevBookings.filter((b) => b.event?.eventId !== booking.event?.eventId)
+        );
+
+        alert('All tickets for this event have been canceled successfully!');
+      } catch (err) {
+        console.error('Error canceling tickets:', err);
+        alert('Failed to cancel tickets. Please try again.');
       }
-
-      // Remove the deleted ticket from the bookings list
-      setBookings((prevBookings) =>
-        prevBookings.filter((booking) => booking.ticketID !== ticketId)
-      );
-
-      alert('Ticket deleted successfully!');
-    } catch (err) {
-      console.error('Error deleting ticket:', err);
-      alert('Failed to delete ticket. Please try again.');
     }
   };
 
-  // Group bookings by event
-  const bookedEvents = bookings.reduce((acc, booking) => {
-    if (!acc[booking.event.eventId]) {
-      acc[booking.event.eventId] = booking.event;
-      acc[booking.event.eventId].ticketsForEvent = []; // Add an array to store tickets for this event
+  const handleCancelTicket = async (ticketID) => {
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      console.error('Authentication token not found. Redirecting to login.');
+      navigate('/login');
+      return;
     }
-    acc[booking.event.eventId].ticketsForEvent.push(booking);
-    return acc;
-  }, {});
+
+    if (window.confirm(`Are you sure you want to cancel ticket #${ticketID}?`)) {
+      try {
+        await axios.put(`http://localhost:9090/tickets/cancel/${ticketID}`, null, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        // Update the selected booking's ticket list
+        setSelectedBooking((prevBooking) => ({
+          ...prevBooking,
+          ticketIDs: prevBooking.ticketIDs.filter((id) => id !== ticketID),
+        }));
+
+        alert(`Ticket #${ticketID} has been canceled successfully!`);
+      } catch (err) {
+        console.error('Error canceling ticket:', err);
+        alert('Failed to cancel the ticket. Please try again.');
+      }
+    }
+  };
+
+  if (loading) {
+    return <div>Loading your bookings...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', minWidth: '100vw' }}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton edge="start" color="inherit" aria-label="back" onClick={handleGoBack}>
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h6">Booking History</Typography>
-        </Toolbar>
-      </AppBar>
-      <Container style={{ flexGrow: 1, marginTop: '20px' }}>
-        <Typography variant="h4" gutterBottom>
-          Your Booked Events
-        </Typography>
-        {loading ? (
-          <CircularProgress />
-        ) : error ? (
-          <Typography color="error">{error}</Typography>
-        ) : Object.values(bookedEvents).length > 0 ? (
-          <Grid container spacing={3}>
-            {Object.values(bookedEvents).map((event) => (
-              <Grid item xs={12} sm={6} md={4} key={event.eventId}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" component="div">
-                      {event.name}
-                    </Typography>
-                    <Typography variant="subtitle1" color="textSecondary">
-                      {event.category}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Location: {event.location}
-                    </Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      Date: {new Date(event.date).toLocaleDateString()}
-                    </Typography>
-                    {event.ticketsForEvent.map((ticket) => (
-                      <div key={ticket.ticketID} style={{ marginTop: '10px' }}>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          style={{ marginRight: '5px' }}
-                          onClick={() => handleViewTicket(ticket)}
-                        >
-                          View Ticket ({ticket.ticketID})
-                        </Button>
-                        <Button
-                          variant="contained"
-                          color="secondary"
-                          onClick={() => handleDeleteTicket(ticket.ticketID)}
-                        >
-                          Cancel Ticket
-                        </Button>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Typography>No previous bookings found.</Typography>
-        )}
-        {/* Modal for displaying the ticket */}
-        <Modal open={openModal} onClose={handleCloseModal}>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              bgcolor: 'background.paper',
-              boxShadow: 24,
-              p: 4,
-              width: '60vw',
-              height: 'auto', // Adjust height to fit content
-              maxHeight: '90vh', // Ensure it doesn't exceed the viewport height
-            }}
-          >
-            <IconButton
-              onClick={handleCloseModal}
-              sx={{ position: 'absolute', top: 10, right: 10 }}
-            >
-              <CloseIcon />
-            </IconButton>
-            {selectedTicket && (
+    <div className="booking-dashboard">
+      <Navbar />
+      <div className="dashboard-content">
+        {selectedBooking ? (
+          <div className="ticket-list">
+            <h2>Tickets for {selectedBooking.event?.name}</h2>
+            {selectedBooking.ticketIDs.map((ticketID) => (
               <Ticket
-                eventName={selectedTicket.event.name} // Pass the event name as a prop
-                issuedBy={selectedTicket.event.user.userName} // Assuming event has user details
-                inviteNumber={selectedTicket.ticketID}
-                bookingDate={new Date(selectedTicket.bookingDate).toLocaleDateString()}
-                status={selectedTicket.status}
+                key={ticketID}
+                eventName={selectedBooking.event?.name}
+                issuedBy={selectedBooking.event?.user?.userName}
+                inviteNumber={ticketID}
+                bookingDate={selectedBooking.event?.date}
+                status={selectedBooking.status}
+                onCancel={handleCancelTicket} // Pass the cancel handler
               />
+            ))}
+            <button onClick={handleGoBack}>Back to Bookings</button>
+          </div>
+        ) : (
+          <>
+            <h2>Your Bookings</h2>
+            {groupedBookings.length === 0 ? (
+              <p>No bookings found.</p>
+            ) : (
+              <div className="booking-list">
+                {groupedBookings.map((booking) => (
+                  <BookingCard
+                    key={booking.event?.eventId}
+                    ticketID={booking.ticketID} // Combined ticket IDs
+                    eventName={booking.event?.name}
+                    date={booking.event?.date}
+                    location={booking.event?.location}
+                    organizerName={booking.event?.user?.userName}
+                    onView={() => handleViewTicket(booking)}
+                    onCancel={() => handleCancelTickets(booking)} // Pass the cancel handler
+                  />
+                ))}
+              </div>
             )}
-          </Box>
-        </Modal>
-      </Container>
+          </>
+        )}
+      </div>
     </div>
   );
-}
+};
 
 export default BookingDashboard;

@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
-import "./css/LoginForm.css"; // Make sure this CSS file contains the styles for the new structure
+import "./css/LoginForm.css"; // Ensure this CSS file contains the styles for the new structure
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [showSignUp, setShowSignUp] = useState(false);
   const [signUpUsername, setSignUpUsername] = useState("");
   const [signUpPassword, setSignUpPassword] = useState("");
@@ -17,7 +16,6 @@ const LoginForm = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
 
     try {
       const response = await fetch("http://localhost:9090/users/login", {
@@ -32,7 +30,16 @@ const LoginForm = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Invalid username or password");
+        // Check if the response is JSON or plain text
+        const contentType = response.headers.get("Content-Type");
+        let errorMessage = "Invalid username or password";
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } else {
+          errorMessage = await response.text(); // Handle plain text response
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -51,16 +58,15 @@ const LoginForm = () => {
         throw new Error("Invalid role");
       }
     } catch (err) {
-      setError(err.message);
+      window.alert(err.message); // Show clean error message
     }
   };
 
   const handleSignUp = async (e) => {
     e.preventDefault();
-    setError(""); // Clear any previous errors
 
     const signupData = {
-      userName: signUpUsername, // Changed 'username' to 'userName'
+      userName: signUpUsername,
       password: signUpPassword,
       email: signUpEmail,
       contactNumber: signUpContactNumber,
@@ -75,7 +81,7 @@ const LoginForm = () => {
 
     if (isOrganizer) {
       url = "http://localhost:9090/organizer/create";
-      body = JSON.stringify(signupData); // Organizer API might not need the 'role' field
+      body = JSON.stringify(signupData);
     }
 
     try {
@@ -86,20 +92,27 @@ const LoginForm = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Signup failed");
+        // Check if the response is JSON or plain text
+        const contentType = response.headers.get("Content-Type");
+        let errorMessage = "Signup failed";
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } else {
+          errorMessage = await response.text(); // Handle plain text response
+        }
+        throw new Error(errorMessage);
       }
 
       // Optionally, redirect to login or show a success message
       setShowSignUp(false); // Go back to the login form
     } catch (err) {
-      setError(err.message);
+      window.alert(err.message); // Show clean error message
     }
   };
 
   const handleToggleSignUp = () => {
     setShowSignUp(!showSignUp);
-    setError(""); // Clear any previous errors when toggling
   };
 
   const handleOrganizerChange = (e) => {
@@ -140,7 +153,6 @@ const LoginForm = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
-                {error && !showSignUp && <div className="login-error">{error}</div>}
                 <button className="flip-card__btn" type="submit">
                   Let`s go!
                 </button>
@@ -192,7 +204,6 @@ const LoginForm = () => {
                   <span className="checkmark"></span>
                   Organizer
                 </label>
-                {error && showSignUp && <div className="login-error">{error}</div>}
                 <button className="flip-card__btn" type="submit">
                   Confirm!
                 </button>

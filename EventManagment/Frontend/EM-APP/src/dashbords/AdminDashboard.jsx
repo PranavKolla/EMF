@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Container, Typography, Card, CardContent, Button, Grid } from "@mui/material";
+import Navbar from "../components/Navbar"; // Import Navbar
+import "./css/AdminDashboard.css"; // Import the CSS file
+import axios from "axios"; // Import Axios
 
 const AdminDashboard = () => {
   const [organizers, setOrganizers] = useState([]);
@@ -8,49 +10,64 @@ const AdminDashboard = () => {
 
   // Retrieve the token from localStorage
   const token = localStorage.getItem("jwtToken");
-  console.log("Token:", token);
 
   // Fetch all organizers from the API
   const fetchOrganizers = async () => {
     try {
-      const response = await fetch("http://localhost:9090/organizer/all", {
-        method: "GET",
+      const response = await axios.get("http://localhost:9090/organizer/all", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setOrganizers(data);
+      setOrganizers(response.data);
     } catch (error) {
-      setErrorMessage(`Failed to fetch organizers: ${error.message}`);
+      console.error("Error fetching organizers:", error);
+      setErrorMessage(`Failed to fetch organizers: ${error.response?.data?.message || error.message}`);
     }
   };
 
   // Approve an organizer
   const handleApprove = async (tempUserId) => {
     try {
-      const response = await fetch(`http://localhost:9090/organizer/admin/approve/${tempUserId}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      await axios.post(
+        `http://localhost:9090/organizer/admin/approve/${tempUserId}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       setSuccessMessage("Organizer approved successfully!");
       setOrganizers((prevOrganizers) =>
         prevOrganizers.filter((organizer) => organizer.tempUserId !== tempUserId)
       ); // Remove the approved organizer from the list
     } catch (error) {
-      setErrorMessage(`Failed to approve organizer: ${error.message}`);
+      console.error("Error approving organizer:", error);
+      setErrorMessage(`Failed to approve organizer: ${error.response?.data?.message || error.message}`);
+    }
+  };
+
+  // Disapprove an organizer
+  const handleDisapprove = async (tempUserId) => {
+    if (window.confirm("Are you sure you want to disapprove this organizer?")) {
+      try {
+        await axios.delete(`http://localhost:9090/organizer/admin/disapprove/${tempUserId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setSuccessMessage("Organizer disapproved and removed successfully!");
+        setOrganizers((prevOrganizers) =>
+          prevOrganizers.filter((organizer) => organizer.tempUserId !== tempUserId)
+        ); // Remove the disapproved organizer from the list
+      } catch (error) {
+        console.error("Error disapproving organizer:", error);
+        setErrorMessage(`Failed to disapprove organizer: ${error.response?.data?.message || error.message}`);
+      }
     }
   };
 
@@ -60,34 +77,35 @@ const AdminDashboard = () => {
   }, [token]);
 
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
-        Admin Dashboard
-      </Typography>
-      {successMessage && <Typography style={{ color: "green" }}>{successMessage}</Typography>}
-      {errorMessage && <Typography style={{ color: "red" }}>{errorMessage}</Typography>}
-      <Grid container spacing={3}>
-        {organizers.map((organizer) => (
-          <Grid item xs={12} sm={6} md={4} key={organizer.tempUserId}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6">{organizer.userName}</Typography>
-                <Typography>Email: {organizer.email}</Typography>
-                <Typography>Contact: {organizer.contactNumber}</Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => handleApprove(organizer.tempUserId)}
-                  style={{ marginTop: "10px" }}
-                >
-                  Approve
-                </Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-    </Container>
+    <>
+      <Navbar /> {/* Add Navbar here */}
+      <div className="admin-dashboard-container">
+        <h1 className="dashboard-title">Admin Dashboard</h1>
+        {successMessage && <p className="success-message">{successMessage}</p>}
+        {errorMessage && <p className="error-message">{errorMessage}</p>}
+        <div className="organizers-grid">
+          {organizers.map((organizer) => (
+            <div className="organizer-card" key={organizer.tempUserId}>
+              <h3>{organizer.userName}</h3>
+              <p>Email: {organizer.email}</p>
+              <p>Contact: {organizer.contactNumber}</p>
+              <button
+                className="approve-button"
+                onClick={() => handleApprove(organizer.tempUserId)}
+              >
+                Approve
+              </button>
+              <button
+                className="disapprove-button"
+                onClick={() => handleDisapprove(organizer.tempUserId)}
+              >
+                Disapprove
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
   );
 };
 

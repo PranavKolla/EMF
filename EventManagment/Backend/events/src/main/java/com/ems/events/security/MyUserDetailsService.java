@@ -2,7 +2,6 @@ package com.ems.events.security;
 
 import com.ems.events.entity.User;
 import com.ems.events.repo.UserRepository;
-import com.ems.events.security.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

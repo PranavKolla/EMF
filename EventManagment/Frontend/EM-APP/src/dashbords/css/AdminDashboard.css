@@ -1,0 +1,138 @@
+/* General container styling */
+.admin-dashboard-container {
+    font-family: 'Arial', sans-serif;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+    box-sizing: border-box;
+    background-color: #f9f9f9; /* Light background color */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-y: auto; /* Enable vertical scrolling */
+  }
+  
+  /* Title styling */
+  .dashboard-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 2rem;
+    font-weight: bold;
+  }
+  
+  /* Success and error messages */
+  .success-message {
+    color: green;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  .error-message {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+  
+  /* Organizers grid layout */
+  .organizers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+    gap: 20px;
+    width: 100%;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  /* Organizer card styling */
+  .organizer-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .organizer-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  }
+  
+  .organizer-card h3 {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+  }
+  
+  .organizer-card p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 10px;
+  }
+  
+  /* Approve button styling */
+  .approve-button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 8px 12px; /* Reduced padding for smaller width */
+    margin-right: 8px; /* Add gap between buttons */
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 0.9rem; /* Adjust font size */
+  }
+  
+  .approve-button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Disapprove button styling */
+  .disapprove-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 12px; /* Reduced padding for smaller width */
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 0.9rem; /* Adjust font size */
+  }
+  
+  .disapprove-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Add spacing between buttons */
+  .organizer-card button {
+    margin-bottom: 10px; /* Add spacing between buttons if stacked vertically */
+  }
+  
+  /* Responsive design */
+  @media (max-width: 768px) {
+    .dashboard-title {
+      font-size: 1.5rem;
+    }
+  
+    .organizer-card {
+      padding: 15px;
+    }
+  
+    .organizer-card h3 {
+      font-size: 1rem;
+    }
+  
+    .organizer-card p {
+      font-size: 0.9rem;
+    }
+  
+    .approve-button {
+      font-size: 0.9rem;
+      padding: 8px 16px;
+    }
+  }

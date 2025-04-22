@@ -30,7 +30,14 @@ public class TempUserController {
         tempUserService.approveTempUser(tempUserId);
         return "TempUser approved and moved to User table successfully.";
     }
-    
+
+    // API to disapprove a TempUser
+    @DeleteMapping("/admin/disapprove/{tempUserId}")
+    public String disapproveTempUser(@PathVariable Long tempUserId) {
+        tempUserService.disapproveTempUser(tempUserId);
+        return "TempUser disapproved and removed successfully.";
+    }
+
     @GetMapping("/all")
     public List<TempUser> getAllTempUsers() {
         return tempUserService.getAllTempUsers();
