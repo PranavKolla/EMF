@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar"; // Import Navbar
 import "./css/AdminDashboard.css"; // Import the CSS file
+import axios from "axios"; // Import Axios
 
 const AdminDashboard = () => {
   const [organizers, setOrganizers] = useState([]);
@@ -13,44 +14,60 @@ const AdminDashboard = () => {
   // Fetch all organizers from the API
   const fetchOrganizers = async () => {
     try {
-      const response = await fetch("http://localhost:9090/organizer/all", {
-        method: "GET",
+      const response = await axios.get("http://localhost:9090/organizer/all", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setOrganizers(data);
+      setOrganizers(response.data);
     } catch (error) {
-      setErrorMessage(`Failed to fetch organizers: ${error.message}`);
+      console.error("Error fetching organizers:", error);
+      setErrorMessage(`Failed to fetch organizers: ${error.response?.data?.message || error.message}`);
     }
   };
 
   // Approve an organizer
   const handleApprove = async (tempUserId) => {
     try {
-      const response = await fetch(`http://localhost:9090/organizer/admin/approve/${tempUserId}`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
+      await axios.post(
+        `http://localhost:9090/organizer/admin/approve/${tempUserId}`,
+        null,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       setSuccessMessage("Organizer approved successfully!");
       setOrganizers((prevOrganizers) =>
         prevOrganizers.filter((organizer) => organizer.tempUserId !== tempUserId)
       ); // Remove the approved organizer from the list
     } catch (error) {
-      setErrorMessage(`Failed to approve organizer: ${error.message}`);
+      console.error("Error approving organizer:", error);
+      setErrorMessage(`Failed to approve organizer: ${error.response?.data?.message || error.message}`);
+    }
+  };
+
+  // Disapprove an organizer
+  const handleDisapprove = async (tempUserId) => {
+    if (window.confirm("Are you sure you want to disapprove this organizer?")) {
+      try {
+        await axios.delete(`http://localhost:9090/organizer/admin/disapprove/${tempUserId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setSuccessMessage("Organizer disapproved and removed successfully!");
+        setOrganizers((prevOrganizers) =>
+          prevOrganizers.filter((organizer) => organizer.tempUserId !== tempUserId)
+        ); // Remove the disapproved organizer from the list
+      } catch (error) {
+        console.error("Error disapproving organizer:", error);
+        setErrorMessage(`Failed to disapprove organizer: ${error.response?.data?.message || error.message}`);
+      }
     }
   };
 
@@ -77,6 +94,12 @@ const AdminDashboard = () => {
                 onClick={() => handleApprove(organizer.tempUserId)}
               >
                 Approve
+              </button>
+              <button
+                className="disapprove-button"
+                onClick={() => handleDisapprove(organizer.tempUserId)}
+              >
+                Disapprove
               </button>
             </div>
           ))}

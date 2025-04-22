@@ -79,19 +79,38 @@
   
   /* Approve button styling */
   .approve-button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #fff;
-    background-color: #28a745; /* Green color */
+    background-color: #4caf50;
+    color: white;
     border: none;
-    border-radius: 5px;
+    padding: 8px 12px; /* Reduced padding for smaller width */
+    margin-right: 8px; /* Add gap between buttons */
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    border-radius: 5px;
+    font-size: 0.9rem; /* Adjust font size */
   }
   
   .approve-button:hover {
-    background-color: #218838; /* Darker green on hover */
+    background-color: #45a049;
+  }
+  
+  /* Disapprove button styling */
+  .disapprove-button {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 8px 12px; /* Reduced padding for smaller width */
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 0.9rem; /* Adjust font size */
+  }
+  
+  .disapprove-button:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Add spacing between buttons */
+  .organizer-card button {
+    margin-bottom: 10px; /* Add spacing between buttons if stacked vertically */
   }
   
   /* Responsive design */

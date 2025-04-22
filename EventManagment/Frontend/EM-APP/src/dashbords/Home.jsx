@@ -4,6 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import './css/Home.css'; // Ensure this file contains the new styles
 import Navbar from '../components/Navbar';
 import EventCard from '../components/EventCard'; // Import the EventCard component
+import axios from 'axios'; // Import Axios
 
 function Home() {
   const [username, setUsername] = useState('');
@@ -38,22 +39,16 @@ function Home() {
     }
 
     try {
-      const response = await fetch('http://localhost:9090/events/view/all', {
-        method: 'GET',
+      const response = await axios.get('http://localhost:9090/events/view/all', {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch events');
-      }
-
-      const data = await response.json();
-      setEvents(data);
+      setEvents(response.data);
     } catch (error) {
-      console.error('Error fetching events:', error.message);
+      console.error('Error fetching events:', error.response?.data?.message || error.message);
     }
   };
 
@@ -68,7 +63,7 @@ function Home() {
     setFilteredEvents(filtered);
   };
 
-  const handleBookEvent = (eventId) => {
+  const handleBookEvent = async (eventId) => {
     const token = localStorage.getItem('jwtToken');
 
     if (!token) {
@@ -87,27 +82,24 @@ function Home() {
       return;
     }
 
-    fetch(`http://localhost:9090/tickets/book?eventId=${eventId}&userId=${userId}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error(`Booking failed: ${response.status}`);
+    try {
+      const response = await axios.post(
+        `http://localhost:9090/tickets/book`,
+        null,
+        {
+          params: { eventId, userId },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log('Booking successful:', data);
-        alert(`Booking successful! Ticket ID: ${data.ticketID}`);
-      })
-      .catch((err) => {
-        console.error('Error during booking:', err.message);
-        alert(`Failed to book ticket: ${err.message}`);
-      });
+      );
+
+      alert(`Booking successful! Ticket ID: ${response.data.ticketID}`);
+    } catch (error) {
+      console.error('Error during booking:', error.response?.data?.message || error.message);
+      alert(`Failed to book ticket: ${error.response?.data?.message || error.message}`);
+    }
   };
 
   const handleExploreClick = () => {

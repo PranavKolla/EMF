@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar'; // Import Navbar
 import { jwtDecode } from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // Import Axios
 import './css/FeedbackDashboard.css'; // Add your custom CSS file
 
 function FeedbackDashboard() {
@@ -40,18 +41,13 @@ function FeedbackDashboard() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`http://localhost:9090/tickets/userTicket/${userId}`, {
+      const response = await axios.get(`http://localhost:9090/tickets/userTicket/${userId}`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(`Failed to fetch booked events: ${response.status} - ${errorData.message || response.statusText}`);
-      }
-      const data = await response.json();
       const eventsMap = new Map();
-      data.forEach(ticket => {
+      response.data.forEach(ticket => {
         if (!eventsMap.has(ticket.event.eventId)) {
           eventsMap.set(ticket.event.eventId, ticket.event);
         }
@@ -60,7 +56,7 @@ function FeedbackDashboard() {
       setLoading(false);
     } catch (err) {
       console.error('Error fetching booked events:', err);
-      setError(err.message);
+      setError(err.response?.data?.message || err.message);
       setLoading(false);
     }
   };
@@ -101,50 +97,28 @@ function FeedbackDashboard() {
 
     try {
       const token = localStorage.getItem('jwtToken');
-      const params = new URLSearchParams();
-      params.append('eventId', selectedEventId);
-      params.append('userId', currentUserId);
-      params.append('message', feedbackMessage);
-      params.append('rating', ratingToSend.toString());
+      const params = {
+        eventId: selectedEventId,
+        userId: currentUserId,
+        message: feedbackMessage,
+        rating: ratingToSend,
+      };
 
-      const url = `http://localhost:9090/feedback/submit?${params.toString()}`;
-
-      const response = await fetch(url, {
-        method: 'POST',
+      const response = await axios.post('http://localhost:9090/feedback/submit', null, {
+        params,
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      if (!response.ok) {
-        // Check if the response is JSON or plain text
-        const contentType = response.headers.get('Content-Type');
-        let errorMessage = `Failed to submit feedback: ${response.status}`;
-        if (contentType && contentType.includes('application/json')) {
-          const errorData = await response.json();
-          errorMessage = errorData.message || errorMessage;
-        } else {
-          errorMessage = await response.text(); // Handle plain text response
-        }
-
-        // Extract the relevant part of the error message
-        const extractedMessage = extractValidationMessage(errorMessage);
-        throw new Error(extractedMessage);
-      }
-
       setFeedbackSubmitLoading(false);
       setFeedbackSubmitSuccess(true);
     } catch (err) {
       console.error('Error submitting feedback:', err);
-      window.alert(err.message); // Show clean error message in a popup
+      const errorMessage = err.response?.data?.message || 'An unexpected error occurred. Please try again.';
+      window.alert(errorMessage); // Show clean error message in a popup
       setFeedbackSubmitLoading(false);
     }
-  };
-
-  // Helper function to extract the relevant validation message
-  const extractValidationMessage = (errorMessage) => {
-    const match = errorMessage.match(/Feedback must be between 5 and 500 characters/);
-    return match ? match[0] : 'An unexpected error occurred. Please try again.';
   };
 
   return (

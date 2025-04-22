@@ -5,6 +5,7 @@ import BookingCard from '../components/BookingCard'; // Adjust the path if neede
 import Navbar from '../components/Navbar'; // Adjust the path if needed
 import Ticket from '../components/Ticket'; // Import the Ticket component
 import './css/BookingDashboard.css'; // You can reuse or modify this CSS
+import axios from 'axios'; // Import Axios
 
 const BookingDashboard = () => {
   const [bookings, setBookings] = useState([]);
@@ -15,48 +16,41 @@ const BookingDashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("jwtToken");
+    const token = localStorage.getItem('jwtToken');
     if (token) {
       try {
         const decoded = jwtDecode(token);
         fetchBookings(decoded.userId, token);
       } catch (err) {
-        console.error("Invalid token:", err);
-        setError("Authentication error.");
+        console.error('Invalid token:', err);
+        setError('Authentication error.');
         setLoading(false);
         return;
       }
     } else {
-      setError("No authentication token found.");
+      setError('No authentication token found.');
       setLoading(false);
     }
   }, [navigate]);
 
   const fetchBookings = async (currentUserId, authToken) => {
     setLoading(true);
-    setError("");
+    setError('');
     try {
-      const response = await fetch(`http://localhost:9090/tickets/userTicket/${currentUserId}`, {
+      const response = await axios.get(`http://localhost:9090/tickets/userTicket/${currentUserId}`, {
         headers: {
           Authorization: `Bearer ${authToken}`,
         },
       });
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          `Failed to fetch bookings: ${response.status} - ${errorData.message || response.statusText}`
-        );
-      }
-      const data = await response.json();
 
       // Group bookings by event
-      const grouped = groupBookingsByEvent(data);
+      const grouped = groupBookingsByEvent(response.data);
       setGroupedBookings(grouped);
-      setBookings(data);
+      setBookings(response.data);
       setLoading(false);
     } catch (err) {
-      console.error("Error fetching bookings:", err);
-      setError(err.message);
+      console.error('Error fetching bookings:', err);
+      setError(err.response?.data?.message || err.message);
       setLoading(false);
     }
   };
@@ -76,7 +70,7 @@ const BookingDashboard = () => {
     });
     return Object.values(grouped).map((group) => ({
       ...group,
-      ticketID: group.ticketIDs.join("/"), // Combine ticket IDs into a single string
+      ticketID: group.ticketIDs.join('/'), // Combine ticket IDs into a single string
     }));
   };
 
@@ -84,7 +78,7 @@ const BookingDashboard = () => {
     if (selectedBooking) {
       setSelectedBooking(null); // Go back to the booking list
     } else {
-      navigate("/");
+      navigate('/');
     }
   };
 
@@ -93,82 +87,76 @@ const BookingDashboard = () => {
   };
 
   const handleCancelTickets = async (booking) => {
-    const token = localStorage.getItem("jwtToken");
+    const token = localStorage.getItem('jwtToken');
     if (!token) {
-      console.error("Authentication token not found. Redirecting to login.");
-      navigate("/login");
+      console.error('Authentication token not found. Redirecting to login.');
+      navigate('/login');
       return;
     }
-  
-    if (window.confirm("Are you sure you want to cancel all tickets for this event?")) {
+
+    if (window.confirm('Are you sure you want to cancel all tickets for this event?')) {
       try {
         // Cancel all tickets for the selected booking
         const cancelPromises = booking.ticketIDs.map((ticketID) =>
-          fetch(`http://localhost:9090/tickets/cancel/${ticketID}`, {
-            method: "PUT",
+          axios.put(`http://localhost:9090/tickets/cancel/${ticketID}`, null, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
           })
         );
-  
+
         // Wait for all cancellation requests to complete
         const responses = await Promise.all(cancelPromises);
-  
+
         // Check if any cancellation failed
-        const failedResponses = responses.filter((response) => !response.ok);
+        const failedResponses = responses.filter((response) => response.status !== 200);
         if (failedResponses.length > 0) {
-          throw new Error("Failed to cancel some tickets. Please try again.");
+          throw new Error('Failed to cancel some tickets. Please try again.');
         }
-  
+
         // Remove the canceled tickets from the state
         setGroupedBookings((prevBookings) =>
           prevBookings.filter((b) => b.event?.eventId !== booking.event?.eventId)
         );
-  
-        alert("All tickets for this event have been canceled successfully!");
+
+        alert('All tickets for this event have been canceled successfully!');
       } catch (err) {
-        console.error("Error canceling tickets:", err);
-        alert("Failed to cancel tickets. Please try again.");
+        console.error('Error canceling tickets:', err);
+        alert('Failed to cancel tickets. Please try again.');
       }
     }
   };
 
   const handleCancelTicket = async (ticketID) => {
-    const token = localStorage.getItem("jwtToken");
+    const token = localStorage.getItem('jwtToken');
     if (!token) {
-      console.error("Authentication token not found. Redirecting to login.");
-      navigate("/login");
+      console.error('Authentication token not found. Redirecting to login.');
+      navigate('/login');
       return;
     }
-  
+
     if (window.confirm(`Are you sure you want to cancel ticket #${ticketID}?`)) {
       try {
-        const response = await fetch(`http://localhost:9090/tickets/cancel/${ticketID}`, {
-          method: "PUT",
+        await axios.put(`http://localhost:9090/tickets/cancel/${ticketID}`, null, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-  
-        if (!response.ok) {
-          throw new Error("Failed to cancel the ticket. Please try again.");
-        }
-  
+
         // Update the selected booking's ticket list
         setSelectedBooking((prevBooking) => ({
           ...prevBooking,
           ticketIDs: prevBooking.ticketIDs.filter((id) => id !== ticketID),
         }));
-  
+
         alert(`Ticket #${ticketID} has been canceled successfully!`);
       } catch (err) {
-        console.error("Error canceling ticket:", err);
-        alert("Failed to cancel the ticket. Please try again.");
+        console.error('Error canceling ticket:', err);
+        alert('Failed to cancel the ticket. Please try again.');
       }
     }
   };
-  
+
   if (loading) {
     return <div>Loading your bookings...</div>;
   }
