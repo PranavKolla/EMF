@@ -1,0 +1,74 @@
+/* General Dialog Styling */
+.MuiDialog-paper {
+  border-radius: 12px;
+  padding: 16px;
+  background-color: #f8f9fa; /* Light background for the dialog */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Dialog Title */
+.dialog-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #343a40; /* Darker text for the title */
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Dialog Content */
+.dialog-content {
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Add spacing between input fields */
+}
+
+/* Input Fields */
+.MuiTextField-root {
+  background-color: #ffffff; /* White background for input fields */
+  border-radius: 8px;
+}
+
+.MuiInputBase-root {
+  font-size: 1rem;
+  color: #495057; /* Neutral text color */
+}
+
+.MuiInputLabel-root {
+  font-size: 0.9rem;
+  color: #6c757d; /* Subtle label color */
+}
+
+/* Dialog Actions */
+.dialog-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 24px;
+}
+
+/* Buttons */
+.MuiButton-root {
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+}
+
+.MuiButton-containedPrimary {
+  background-color: #007bff; /* Primary button color */
+  color: #ffffff;
+}
+
+.MuiButton-containedPrimary:hover {
+  background-color: #0056b3; /* Darker shade on hover */
+}
+
+.MuiButton-outlinedSecondary {
+  color: #6c757d; /* Secondary button color */
+  border-color: #6c757d;
+}
+
+.MuiButton-outlinedSecondary:hover {
+  background-color: rgba(108, 117, 125, 0.1); /* Subtle hover effect */
+}

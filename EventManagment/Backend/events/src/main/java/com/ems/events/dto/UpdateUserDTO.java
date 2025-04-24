@@ -10,7 +10,7 @@ public class UpdateUserDTO {
     private String email;
 
     private String password; // Optional during updates
-
+ 
     private String contactNumber;
 
     // Getters and setters

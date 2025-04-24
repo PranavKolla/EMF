@@ -26,7 +26,27 @@ public class TempUserServiceImpl implements TempUserService {
 
     @Override
     public TempUser createTempUser(TempUser tempUser) {
-        tempUser.setPassword(passwordEncoder.encode(tempUser.getPassword())); // Encode password
+        // Automatically set the role to "ORGANIZER"
+        tempUser.setRole("ORGANIZER");
+
+        // Check if the username already exists in TempUser or User tables
+        if (tempUserRepository.existsByUserName(tempUser.getUserName()) || userRepository.existsByUserName(tempUser.getUserName())) {
+            throw new IllegalArgumentException("Username already exists in the system.");
+        }
+
+        // Check if the email already exists in TempUser or User tables
+        if (tempUserRepository.existsByEmail(tempUser.getEmail()) || userRepository.existsByEmail(tempUser.getEmail())) {
+            throw new IllegalArgumentException("Email already exists in the system.");
+        }
+
+        // Check if the contact number already exists in TempUser or User tables
+        if (tempUserRepository.existsByContactNumber(tempUser.getContactNumber()) || userRepository.existsByContactNumber(tempUser.getContactNumber())) {
+            throw new IllegalArgumentException("Contact number already exists in the system.");
+        }
+
+        // Encode the password before saving
+        tempUser.setPassword(passwordEncoder.encode(tempUser.getPassword()));
+
         return tempUserRepository.save(tempUser);
     }
 
