@@ -51,7 +51,8 @@ const Notification = ({ onClose }) => {
         <p>No notifications</p>
       ) : (
         <ul className="notification-list">
-          {notifications.map((notification) => (
+          {/* Display only the last 5 notifications */}
+          {notifications.slice(-5).reverse().map((notification) => (
             <li key={notification.notificationId} className="notification-item">
               <p>{notification.message}</p>
             </li>

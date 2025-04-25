@@ -16,11 +16,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+
 import java.util.Arrays;
 
 @Configuration
 public class SecurityConfig {
-
+    
     private final MyUserDetailsService userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
@@ -34,11 +35,11 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/create", "/users/login","/organizer/create").permitAll()
+                                    .requestMatchers("/users/create", "/users/login","/organizer/create").permitAll()
                         .requestMatchers("/organizer/admin/approve/**","/organizer/all").hasAuthority("ADMIN") // Use role directly
-                        .requestMatchers("/events/manage/**").hasAnyAuthority("ORGANIZER", "ADMIN") // Use role directly
-                        .requestMatchers("/events/view/all", "/feedback/submit", "/notifications/**","/tickets/**").authenticated()
-                        .anyRequest().authenticated()
+                            .requestMatchers("/events/manage/**").hasAnyAuthority("ORGANIZER", "ADMIN") // Use role directly
+                                    .requestMatchers("/events/view/all", "/feedback/submit", "/notifications/**","/tickets/**").authenticated()
+                            .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

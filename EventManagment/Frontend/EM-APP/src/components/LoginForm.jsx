@@ -65,6 +65,19 @@ const LoginForm = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
 
+    // Validate password length
+    if (signUpPassword.length < 6) {
+      window.alert("Password must be at least 6 characters long.");
+      return;
+    }
+
+    // Validate contact number length and format
+    const contactNumberRegex = /^\d{10}$/; // Regex for exactly 10 digits
+    if (!contactNumberRegex.test(signUpContactNumber)) {
+      window.alert("Contact number must be exactly 10 digits.");
+      return;
+    }
+
     const signupData = {
       userName: signUpUsername,
       password: signUpPassword,
@@ -104,7 +117,8 @@ const LoginForm = () => {
         throw new Error(errorMessage);
       }
 
-      // Optionally, redirect to login or show a success message
+      // Show success message
+      window.alert("Signup successful! You can now log in.");
       setShowSignUp(false); // Go back to the login form
     } catch (err) {
       window.alert(err.message); // Show clean error message
